@@ -1,5 +1,9 @@
 package org.skriptlang.skript.api.nodes;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.parser.ParseContext;
+
 import java.util.List;
 
 /**
@@ -14,6 +18,11 @@ public interface SyntaxNodeType<T extends SyntaxNode> {
 	 */
 	List<String> getSyntaxes();
 
-	T create(List<SyntaxNode> children);
+	@Contract(value = "_ -> new", pure = true)
+	@NotNull T create(List<SyntaxNode> children);
+
+	default boolean canBeParsed(ParseContext context) {
+		return true;
+	}
 
 }

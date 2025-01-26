@@ -15,6 +15,6 @@ public abstract class PatternElement {
 	 * @param nodeType The node type to create the tokenized syntaxes for.
 	 * @param existingSyntaxes The existing syntaxes that have been created so far.
 	 */
-	public abstract List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType nodeType, List<TokenizedSyntax> existingSyntaxes);
+	public abstract List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType<?> nodeType, List<TokenizedSyntax> existingSyntaxes);
 
 }

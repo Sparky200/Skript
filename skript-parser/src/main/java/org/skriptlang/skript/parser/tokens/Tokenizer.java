@@ -29,7 +29,7 @@ public class Tokenizer {
 	 *               but has information pertaining to a syntax node for diagnostic convenience.
 	 * @return The tokenized syntax.
 	 */
-	public static ResultWithDiagnostics<List<TokenizedSyntax>> tokenizeSyntax(@NotNull ScriptSource source, @NotNull SyntaxNodeType nodeType) {
+	public static ResultWithDiagnostics<List<TokenizedSyntax>> tokenizeSyntax(@NotNull ScriptSource source, @NotNull SyntaxNodeType<?> nodeType) {
 		// syntax uses basic tokenization as a base
 		ResultWithDiagnostics<List<Token>> normalResult = tokenize(source);
 		if (!normalResult.isSuccess()) {
@@ -183,17 +183,17 @@ public class Tokenizer {
 				String inputName = token.asString();
 				String inputType = null;
 
-				Token nextToken = tokens.get(index + 1);
+				Token nextToken = tokens.get(index++);
 				if (nextToken.asOperator() == Operator.COLON) {
-					Token inputTypeToken = tokens.get(index + 2);
+					Token inputTypeToken = tokens.get(index + 1);
 
 					if (inputTypeToken.type() != TokenType.IDENTIFIER) {
 						throw new IllegalArgumentException("Expected identifier");
 					}
 
 					inputType = inputTypeToken.asString();
-					index += 2;
-					nextToken = tokens.get(index + 1);
+					index++;
+					nextToken = tokens.get(index++);
 				}
 
 				inputs.add(new SyntaxPatternElement.Input(inputName, inputType));
@@ -466,7 +466,7 @@ public class Tokenizer {
 
 			if (end < content.length() && content.charAt(end) == '"') {
 				end++;
-				return new Token(TokenType.STRING, content.substring(index, end + 1), index, end - index + 1, children);
+				return new Token(TokenType.STRING, content.substring(index, end), index, end - index, children);
 			}
 		}
 

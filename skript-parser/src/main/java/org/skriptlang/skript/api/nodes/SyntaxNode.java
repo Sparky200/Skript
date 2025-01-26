@@ -11,10 +11,4 @@ package org.skriptlang.skript.api.nodes;
  */
 public interface SyntaxNode {
 
-	/**
-	 * The length of this node, in tokens.
-	 * This includes the length of children.
-	 */
-	int length();
-
 }

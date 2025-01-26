@@ -1,7 +1,9 @@
 package org.skriptlang.skript.api;
 
+import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
+import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.util.ResultWithDiagnostics;
 
@@ -24,7 +26,14 @@ public interface SkriptParser {
 	 * Once a node is submitted, the parser will be capable of parsing that node type.
 	 * @param nodeType The node type to submit
 	 */
-	void submitNode(SyntaxNodeType<?> nodeType);
+	void submitNode(@NotNull SyntaxNodeType<?> nodeType);
+
+	/**
+	 * Submits a section scope to the parser.
+	 * The scope will then be available for use in syntax patterns.
+	 * @param scope The scope to submit
+	 */
+	void submitScope(@NotNull SectionScope scope);
 
 	/**
 	 * Gets an <b>immutable</b> view of all node types that have been submitted to the parser.

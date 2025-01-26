@@ -1,5 +1,6 @@
 package org.skriptlang.skript.parser.pattern;
 
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
 import org.skriptlang.skript.parser.TokenizedSyntax;
@@ -19,7 +20,7 @@ public class TokensPatternElement extends PatternElement {
 	private final List<Token> tokens;
 
 	public TokensPatternElement(@NotNull List<Token> tokens) {
-		this.tokens = tokens.stream().toList();
+		this.tokens = ImmutableList.copyOf(tokens);
 	}
 
 	public List<Token> getTokens() {
@@ -27,7 +28,7 @@ public class TokensPatternElement extends PatternElement {
 	}
 
 	@Override
-	public List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType nodeType, List<TokenizedSyntax> existingSyntaxes) {
+	public List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType<?> nodeType, List<TokenizedSyntax> existingSyntaxes) {
 		return existingSyntaxes.stream().map(existingSyntax -> {
 			var newList = new LinkedList<Token>();
 			newList.addAll(existingSyntax.tokens());
