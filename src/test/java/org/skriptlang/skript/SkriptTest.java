@@ -2,8 +2,8 @@ package org.skriptlang.skript;
 
 import ch.njol.skript.SkriptAPIException;
 import org.junit.Test;
-import org.skriptlang.skript.stdlib.SkriptAddon;
-import org.skriptlang.skript.stdlib.BaseSkriptAddonTests;
+import org.skriptlang.skript.addon.SkriptAddon;
+import org.skriptlang.skript.addon.BaseSkriptAddonTests;
 
 import static org.junit.Assert.*;
 
