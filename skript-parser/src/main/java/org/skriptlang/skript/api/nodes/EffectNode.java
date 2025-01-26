@@ -1,10 +1,17 @@
 package org.skriptlang.skript.api.nodes;
 
-/**
- * An effect node is a statement with effect, executed unconditionally if it is reached.
- */
-public interface EffectNode {
+import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.api.runtime.ExecuteContext;
+import org.skriptlang.skript.api.util.ExecuteResult;
 
-	void execute();
+/**
+ * An effect node is a verbal statement representing an action.
+ */
+public interface EffectNode extends StatementNode {
+
+	/**
+	 * Executes the statement.
+	 */
+	@NotNull ExecuteResult execute(@NotNull ExecuteContext context);
 
 }

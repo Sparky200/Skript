@@ -1,5 +1,6 @@
 package org.skriptlang.skript.parser.pattern;
 
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
 import org.skriptlang.skript.parser.TokenizedSyntax;
@@ -15,8 +16,8 @@ public class ChoicePatternElement extends PatternElement {
 	private final List<PatternElement> right;
 
 	public ChoicePatternElement(@NotNull List<PatternElement> left, @NotNull List<PatternElement> right) {
-		this.left = left.stream().toList();
-		this.right = right.stream().toList();
+		this.left = ImmutableList.copyOf(left);
+		this.right = ImmutableList.copyOf(right);
 	}
 
 	public List<PatternElement> getLeft() {
@@ -28,7 +29,7 @@ public class ChoicePatternElement extends PatternElement {
 	}
 
 	@Override
-	public List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType nodeType, List<TokenizedSyntax> existingSyntaxes) {
+	public List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType<?> nodeType, List<TokenizedSyntax> existingSyntaxes) {
 		List<TokenizedSyntax> left = new LinkedList<>(existingSyntaxes);
 		List<TokenizedSyntax> right = new LinkedList<>(existingSyntaxes);
 

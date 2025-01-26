@@ -1,10 +1,10 @@
 package org.skriptlang.skript.api.util;
 
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,7 +17,7 @@ public final class ResultWithDiagnostics<T> {
 
 	private ResultWithDiagnostics(@Nullable T result, @Nullable List<ScriptDiagnostic> diagnostics) {
 		this.result = result;
-		this.diagnostics = diagnostics != null ? diagnostics.stream().toList() : Collections.emptyList();
+		this.diagnostics = diagnostics != null ? ImmutableList.copyOf(diagnostics.stream().toList()) : ImmutableList.of();
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package org.skriptlang.skript.parser.pattern;
 
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
 import org.skriptlang.skript.parser.TokenizedSyntax;
@@ -16,7 +17,7 @@ public class GroupPatternElement extends PatternElement {
 	private final boolean isOptional;
 
 	public GroupPatternElement(@NotNull List<PatternElement> elements, boolean isOptional) {
-		this.elements = elements.stream().toList();
+		this.elements = ImmutableList.copyOf(elements);
 		this.isOptional = isOptional;
 	}
 
@@ -29,7 +30,7 @@ public class GroupPatternElement extends PatternElement {
 	}
 
 	@Override
-	public List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType nodeType, List<TokenizedSyntax> existingSyntaxes) {
+	public List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType<?> nodeType, List<TokenizedSyntax> existingSyntaxes) {
 		var newList = new LinkedList<TokenizedSyntax>();
 		// preserve original if optional
 		if (isOptional()) newList.addAll(existingSyntaxes);

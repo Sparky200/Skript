@@ -29,7 +29,7 @@ public class Tokenizer {
 	 *               but has information pertaining to a syntax node for diagnostic convenience.
 	 * @return The tokenized syntax.
 	 */
-	public static ResultWithDiagnostics<List<TokenizedSyntax>> tokenizeSyntax(@NotNull ScriptSource source, @NotNull SyntaxNodeType nodeType) {
+	public static ResultWithDiagnostics<List<TokenizedSyntax>> tokenizeSyntax(@NotNull ScriptSource source, @NotNull SyntaxNodeType<?> nodeType) {
 		// syntax uses basic tokenization as a base
 		ResultWithDiagnostics<List<Token>> normalResult = tokenize(source);
 		if (!normalResult.isSuccess()) {
@@ -152,6 +152,19 @@ public class Tokenizer {
 
 		Token closeArrowOrDelimiter = tokens.get(1);
 		if (closeArrowOrDelimiter.asOperator() == Operator.DOUBLE_COLON) {
+
+			if (syntaxTypeToken.asString().equals("token")) {
+				Token tokenTypeToken = tokens.get(2);
+				if (tokenTypeToken.type() != TokenType.IDENTIFIER) {
+					throw new IllegalArgumentException("Expected identifier");
+				}
+				Token closeDelimiter = tokens.get(3);
+				if (closeDelimiter.asOperator() != Operator.GREATER_THAN) {
+					throw new IllegalArgumentException("Expected closing arrow");
+				}
+				return new SyntaxPatternElement(syntaxTypeToken.asString(), List.of(), tokenTypeToken.asString());
+			}
+
 			// inputs or return type are present
 
 			List<SyntaxPatternElement.Input> inputs = new LinkedList<>();
@@ -170,17 +183,17 @@ public class Tokenizer {
 				String inputName = token.asString();
 				String inputType = null;
 
-				Token nextToken = tokens.get(index + 1);
+				Token nextToken = tokens.get(index++);
 				if (nextToken.asOperator() == Operator.COLON) {
-					Token inputTypeToken = tokens.get(index + 2);
+					Token inputTypeToken = tokens.get(index + 1);
 
 					if (inputTypeToken.type() != TokenType.IDENTIFIER) {
 						throw new IllegalArgumentException("Expected identifier");
 					}
 
 					inputType = inputTypeToken.asString();
-					index += 2;
-					nextToken = tokens.get(index + 1);
+					index++;
+					nextToken = tokens.get(index++);
 				}
 
 				inputs.add(new SyntaxPatternElement.Input(inputName, inputType));
@@ -302,17 +315,11 @@ public class Tokenizer {
 					case OPEN_PARENTHESIS, OPEN_BRACKET, PIPE -> {
 						return i;
 					}
-					default -> {
-						return -1;
-					}
 				}
 			} else if (token.type() == TokenType.OPERATOR) {
 				switch (Objects.requireNonNull(token.asOperator())) {
 					case LESS_THAN -> {
 						return i;
-					}
-					default -> {
-						return -1;
 					}
 				}
 			}
@@ -459,7 +466,7 @@ public class Tokenizer {
 
 			if (end < content.length() && content.charAt(end) == '"') {
 				end++;
-				return new Token(TokenType.STRING, content.substring(index, end + 1), index, end - index + 1, children);
+				return new Token(TokenType.STRING, content.substring(index, end), index, end - index, children);
 			}
 		}
 
