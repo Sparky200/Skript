@@ -17,13 +17,14 @@ import java.util.*;
  * @param tokens   The tokens that make up this syntax.
  *                 This will be matched against tokenized scripts to determine if this syntax is present.
  */
-public record TokenizedSyntax(@NotNull SyntaxNodeType<?> nodeType, @NotNull List<Token> tokens) {
+public record TokenizedSyntax(@NotNull SyntaxNodeType<?> nodeType, int patternIndex, @NotNull List<Token> tokens) {
 
-	public TokenizedSyntax(@NotNull SyntaxNodeType<?> nodeType, @NotNull List<Token> tokens) {
+	public TokenizedSyntax(@NotNull SyntaxNodeType<?> nodeType, int patternIndex, @NotNull List<Token> tokens) {
 		Preconditions.checkNotNull(nodeType);
 		Preconditions.checkNotNull(tokens);
 
 		this.nodeType = nodeType;
+		this.patternIndex = patternIndex;
 		this.tokens = Collections.unmodifiableList(tokens);
 	}
 

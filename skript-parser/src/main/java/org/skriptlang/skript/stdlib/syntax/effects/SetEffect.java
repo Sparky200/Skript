@@ -13,14 +13,14 @@ import org.skriptlang.skript.stdlib.syntax.expressions.VariableExpression;
 import java.util.List;
 
 public class SetEffect implements EffectNode {
-	public static final EffectNodeType<SetEffect> TYPE = new EffectNodeType<SetEffect>() {
+	public static final EffectNodeType<SetEffect> TYPE = new EffectNodeType<>() {
 		@Override
 		public List<String> getSyntaxes() {
 			return List.of("set <expr> to <expr>");
 		}
 
 		@Override
-		public @NotNull SetEffect create(List<SyntaxNode> children) {
+		public @NotNull SetEffect create(List<SyntaxNode> children, int matchedPattern) {
 			return new SetEffect((ExpressionNode<?>) children.getFirst(), (ExpressionNode<?>) children.get(1));
 		}
 	};

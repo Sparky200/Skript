@@ -24,7 +24,7 @@ public class IncrementEffect implements EffectNode {
 		}
 
 		@Override
-		public @NotNull IncrementEffect create(List<SyntaxNode> children) {
+		public @NotNull IncrementEffect create(List<SyntaxNode> children, int matchedPattern) {
 			ExpressionNode<?> amountSelector = children.size() == 2 ? (ExpressionNode<?>) children.get(1) : null;
 			return new IncrementEffect((ExpressionNode<?>) children.getFirst(), amountSelector);
 		}

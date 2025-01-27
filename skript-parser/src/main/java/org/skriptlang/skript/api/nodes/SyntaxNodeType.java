@@ -18,10 +18,10 @@ public interface SyntaxNodeType<T extends SyntaxNode> {
 	 */
 	List<String> getSyntaxes();
 
-	@Contract(value = "_ -> new", pure = true)
-	@NotNull T create(List<SyntaxNode> children);
+	@Contract(value = "_, _ -> new", pure = true)
+	@NotNull T create(List<SyntaxNode> children, int matchedPattern);
 
-	default boolean canBeParsed(ParseContext context) {
+	default boolean canBeParsed(ParseContext context, int matchedPattern) {
 		return true;
 	}
 

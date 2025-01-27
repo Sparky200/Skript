@@ -27,9 +27,11 @@ public class Tokenizer {
 	 *
 	 * @param source A source that isn't actually a script,
 	 *               but has information pertaining to a syntax node for diagnostic convenience.
+	 * @param nodeType The node type to attach generated syntaxes to.
+	 * @param patternIndex The index of the node type's pattern that is being generated.
 	 * @return The tokenized syntax.
 	 */
-	public static ResultWithDiagnostics<List<TokenizedSyntax>> tokenizeSyntax(@NotNull ScriptSource source, @NotNull SyntaxNodeType<?> nodeType) {
+	public static ResultWithDiagnostics<List<TokenizedSyntax>> tokenizeSyntax(@NotNull ScriptSource source, @NotNull SyntaxNodeType<?> nodeType, int patternIndex) {
 		// syntax uses basic tokenization as a base
 		ResultWithDiagnostics<List<Token>> normalResult = tokenize(source);
 		if (!normalResult.isSuccess()) {
@@ -50,7 +52,7 @@ public class Tokenizer {
 
 		List<TokenizedSyntax> tokenizedSyntaxes = new LinkedList<>();
 		// initial empty syntax for elements to spin off of
-		tokenizedSyntaxes.add(new TokenizedSyntax(nodeType, Collections.emptyList()));
+		tokenizedSyntaxes.add(new TokenizedSyntax(nodeType, patternIndex, Collections.emptyList()));
 		for (PatternElement patternElement : patternElements) {
 			tokenizedSyntaxes = patternElement.createTokenizedSyntaxes(nodeType, tokenizedSyntaxes);
 		}

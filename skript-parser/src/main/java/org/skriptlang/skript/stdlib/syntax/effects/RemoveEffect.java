@@ -20,7 +20,7 @@ public class RemoveEffect implements EffectNode {
 		}
 
 		@Override
-		public @NotNull RemoveEffect create(@NotNull List<SyntaxNode> children) {
+		public @NotNull RemoveEffect create(@NotNull List<SyntaxNode> children, int matchedPattern) {
 			return new RemoveEffect(
 				(ExpressionNode<?>) children.get(0),
 				(ExpressionNode<?>) children.get(1)

@@ -32,7 +32,7 @@ public class OnScriptLoadEvent implements StructureNode {
 		}
 
 		@Override
-		public @NotNull OnScriptLoadEvent create(List<SyntaxNode> children, @Nullable Map<String, StructureEntryNode> entries) {
+		public @NotNull OnScriptLoadEvent create(List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
 			return new OnScriptLoadEvent((SectionNode) children.getFirst());
 		}
 	};

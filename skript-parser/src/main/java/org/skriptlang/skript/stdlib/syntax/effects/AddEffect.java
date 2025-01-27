@@ -17,16 +17,17 @@ public class AddEffect implements EffectNode {
 		@Override
 		public List<String> getSyntaxes() {
 			return List.of(
-				"(add|give) <expr> to <expr>"
+				"(add|give) <expr> to <expr>",
+				"give <expr> <expr>"
 			);
 		}
 
 		@Override
-		public @NotNull AddEffect create(@NotNull List<SyntaxNode> children) {
-			return new AddEffect(
-				(ExpressionNode<?>) children.get(0),
-				(ExpressionNode<?>) children.get(1)
-			);
+		public @NotNull AddEffect create(@NotNull List<SyntaxNode> children, int matchedPattern) {
+			ExpressionNode<?> receiver = matchedPattern == 0 ? (ExpressionNode<?>) children.get(1) : (ExpressionNode<?>) children.get(0);
+			ExpressionNode<?> value = matchedPattern == 0 ? (ExpressionNode<?>) children.get(0) : (ExpressionNode<?>) children.get(1);
+
+			return new AddEffect(value, receiver);
 		}
 	};
 

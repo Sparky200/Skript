@@ -23,7 +23,7 @@ public class StringLiteralExpression implements ExpressionNode<StringValue> {
 		}
 
 		@Override
-		public @NotNull StringLiteralExpression create(List<SyntaxNode> children) {
+		public @NotNull StringLiteralExpression create(List<SyntaxNode> children, int matchedPattern) {
 			return new StringLiteralExpression(new StringValue(((TokenNode) children.getFirst()).token().asString()));
 		}
 	};
