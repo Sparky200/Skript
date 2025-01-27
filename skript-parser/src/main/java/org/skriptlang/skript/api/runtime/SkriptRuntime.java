@@ -40,6 +40,13 @@ public interface SkriptRuntime {
 	<T extends SkriptValue> @Nullable SkriptValueType<T> getTypeByClass(@NotNull Class<T> clazz);
 
 	/**
+	 * Resolves the name of a type using the runtime's type storage.
+	 * @param type the type to resolve the name of
+	 * @return the name of the type
+	 */
+    @NotNull String getNameOfType(@NotNull SkriptValueType<?> type);
+
+    /**
 	 * Adds a type to the runtime. This method is only available before the runtime is locked.
 	 * @param type the type to add
 	 * @return the constructed type
