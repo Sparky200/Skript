@@ -42,6 +42,7 @@ public interface SkriptProperty<TReceiver extends SkriptValue, TValue extends Sk
 	 * Adds a value to the value of this property on the given receiver.
 	 * <p>
 	 * The default implementation is a no-op meaning this property doesn't support adding any type.
+	 * TODO: invalid docs ^
 	 * @param receiver The receiver to add the value to.
 	 * @param value The value to add.
 	 * @return Whether the value was added.
@@ -64,6 +65,7 @@ public interface SkriptProperty<TReceiver extends SkriptValue, TValue extends Sk
 	 * Removes a value from the value of this property on the given receiver.
 	 * <p>
 	 * The default implementation is a no-op meaning this property doesn't support removing any type.
+	 * TODO: invalid docs ^
 	 * @param receiver The receiver to remove the value from.
 	 * @param value The value to remove.
 	 * @return Whether the value was removed.

@@ -2,10 +2,6 @@ package org.skriptlang.skript.runtime;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.api.nodes.SectionNode;
-import org.skriptlang.skript.api.nodes.StatementNode;
-import org.skriptlang.skript.api.nodes.StructureNode;
-import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 import org.skriptlang.skript.api.script.Script;
@@ -92,13 +88,13 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 		ExecuteContext scriptContext = new ScriptContext(this, script, globalContext());
 
 		ExecuteResult result = SectionUtils.loadStructuresIn(script.root(), scriptContext);
-		if (result instanceof ExecuteResult.Failure) return null;
 
 		synchronized (loadingScripts) {
-			loadedScripts.put(script, scriptContext);
+			if (result instanceof ExecuteResult.Success) loadedScripts.put(script, scriptContext);
 			loadingScripts.remove(script);
 		}
 
+		if (result instanceof ExecuteResult.Failure) return null;
 		return scriptContext;
 	}
 

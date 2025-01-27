@@ -23,13 +23,18 @@ public final class NoneValue extends SkriptValue {
 		return INSTANCE;
 	}
 
+	@Override
+	public String toString() {
+		return "<none>";
+	}
+
 	/**
 	 * A Skript value type representing {@code <none>}.
 	 */
 	public static final class Type extends SkriptValueTypeBase<NoneValue> {
 		private final SkriptProperty<NoneValue, NoneValue> property = new PropagatingProperty(runtime());
 
-		public Type(SkriptRuntime runtime, SkriptValueType<?> superType) {
+		public Type(SkriptRuntime runtime, SkriptValueType<? super NoneValue> superType) {
 			super(runtime, NoneValue.class, superType, Map.of());
 		}
 

@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 import org.skriptlang.skript.api.types.base.SkriptValueTypeBase;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * A value type that is staged to be constructed into a {@link SkriptValueType} with a {@link SkriptRuntime}
@@ -42,12 +42,15 @@ public final class StagedSkriptValueType<T extends SkriptValue> {
 	 * @return The constructed type.
 	 */
 	public SkriptValueType<T> construct(SkriptRuntime runtime) {
-		SkriptValueType<?> superType = runtime.getTypeByName(superTypeName);
+		//noinspection unchecked
+		SkriptValueType<? super T> superType = (SkriptValueType<? super T>) runtime.getTypeByName(superTypeName);
 
-		return new SkriptValueTypeBase<>(runtime, valueClass, superType, properties.entrySet().stream()
-			.map(e -> Map.entry(e.getKey(), e.getValue().construct(runtime)))
-			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-		);
+		Map<String, SkriptProperty<T, ?>> constructedProperties = new LinkedHashMap<>();
+		for (Map.Entry<String, StagedSkriptProperty<T, ?>> entry : properties.entrySet()) {
+			constructedProperties.put(entry.getKey(), entry.getValue().construct(runtime));
+		}
+
+		return new SkriptValueTypeBase<T>(runtime, valueClass, superType, constructedProperties);
 	}
 
 }
