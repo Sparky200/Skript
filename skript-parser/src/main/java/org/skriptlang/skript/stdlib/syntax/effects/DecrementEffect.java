@@ -21,7 +21,7 @@ public class DecrementEffect implements EffectNode {
 		}
 
 		@Override
-		public @NotNull DecrementEffect create(List<SyntaxNode> children) {
+		public @NotNull DecrementEffect create(List<SyntaxNode> children, int matchedPattern) {
 			ExpressionNode<?> amountSelector = children.size() == 2 ? (ExpressionNode<?>) children.get(1) : null;
 			return new DecrementEffect((ExpressionNode<?>) children.getFirst(), amountSelector);
 		}

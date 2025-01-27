@@ -219,7 +219,7 @@ public final class SkriptParserImpl implements SkriptParser {
 				// syntax allowed to use all features
 				.flatMap(nodeType -> {
 					var source = new SyntaxScriptSource(nodeType.getClass().getSimpleName(), nodeType.getSyntaxes().getFirst());
-					var result = Tokenizer.tokenizeSyntax(source, nodeType);
+					var result = Tokenizer.tokenizeSyntax(source, nodeType, 0);
 					if (!result.isSuccess()) {
 						throw new IllegalStateException("Fatal edge case: entry tokenization failed");
 					}
@@ -386,7 +386,7 @@ public final class SkriptParserImpl implements SkriptParser {
 		}
 
 		return (List<Match<ExpressionNode<?>>>) candidates.stream()
-			.filter(candidate -> candidate.nodeType().canBeParsed(parseContext))
+			.filter(candidate -> candidate.nodeType().canBeParsed(parseContext, candidate.patternIndex()))
 			.map(candidate -> tryParse(parseContext, candidate, tokens.subList(index, tokens.size())))
 			.filter(Objects::nonNull)
 			.map(node -> {
@@ -525,13 +525,13 @@ public final class SkriptParserImpl implements SkriptParser {
 		parseContext.pop();
 
 		// TODO: pass through result object to capture parse diagnostics
-		return new Match<>(tokenizedSyntax.nodeType().create(children), tokenIndex);
+		return new Match<>(tokenizedSyntax.nodeType().create(children, tokenizedSyntax.patternIndex()), tokenIndex);
 	}
 
 	private void pushInputs(@NotNull ParseContext parseContext, List<SyntaxPatternElement.Input> inputs) {
 		parseContext.pushSyntaxFrame(inputs.stream().map(input -> {
 			InputNode.Type type = new InputNode.Type(input.name(), input.type());
-			var result = Tokenizer.tokenizeSyntax(new SyntaxScriptSource("input", input.name()), type);
+			var result = Tokenizer.tokenizeSyntax(new SyntaxScriptSource("input", input.name()), type, 0);
 			if (!result.isSuccess()) {
 				throw new IllegalStateException("Fatal edge case: input tokenization failed");
 			}
@@ -576,7 +576,7 @@ public final class SkriptParserImpl implements SkriptParser {
 
 				var source = new SyntaxScriptSource(nodeType.getClass().getSimpleName(), syntax);
 
-				var tokens = Tokenizer.tokenizeSyntax(source, nodeType);
+				var tokens = Tokenizer.tokenizeSyntax(source, nodeType, syntaxes.indexOf(syntax));
 
 				if (!tokens.isSuccess()) {
 					var diagnostics = new LinkedList<>(tokens.getDiagnostics());

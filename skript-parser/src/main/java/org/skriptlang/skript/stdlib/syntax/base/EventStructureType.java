@@ -9,6 +9,7 @@ import org.skriptlang.skript.api.nodes.SyntaxNode;
 import java.util.List;
 import java.util.Map;
 
+// TODO: event base classes
 public class EventStructureType<T extends EventStructure> extends StructureNodeType<T> {
 	private final String eventSyntax;
 
@@ -24,7 +25,7 @@ public class EventStructureType<T extends EventStructure> extends StructureNodeT
 	}
 
 	@Override
-	protected @NotNull T create(@NotNull List<SyntaxNode> children, @Nullable Map<String, StructureEntryNode> entries) {
+	protected @NotNull T create(@NotNull List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
 		return null;
 	}
 }

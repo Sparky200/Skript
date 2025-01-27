@@ -39,7 +39,7 @@ public final class CommandStructure implements StructureNode {
 		}
 
 		@Override
-		protected @NotNull CommandStructure create(@NotNull List<SyntaxNode> children, @Nullable Map<String, StructureEntryNode> entries) {
+		protected @NotNull CommandStructure create(@NotNull List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
 			Preconditions.checkNotNull(entries, "Commands contractually expect entries");
 
 			String name = ((TokenNode) children.getFirst()).token().asString();

@@ -23,7 +23,7 @@ public class NumberLiteralExpression implements ExpressionNode<NumberValue> {
 		}
 
 		@Override
-		public @NotNull NumberLiteralExpression create(List<SyntaxNode> children) {
+		public @NotNull NumberLiteralExpression create(List<SyntaxNode> children, int matchedPattern) {
 			return new NumberLiteralExpression(new NumberValue(Double.parseDouble(((TokenNode) children.getFirst()).token().asString())));
 		}
 	};

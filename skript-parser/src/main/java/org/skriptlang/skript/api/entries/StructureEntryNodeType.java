@@ -21,7 +21,7 @@ public final class StructureEntryNodeType implements StatementNodeType<Structure
 	}
 
 	@Override
-	public @NotNull StructureEntryNode create(List<SyntaxNode> children) {
+	public @NotNull StructureEntryNode create(List<SyntaxNode> children, int matchedPattern) {
 		return new StructureEntryNode(name, children);
 	}
 

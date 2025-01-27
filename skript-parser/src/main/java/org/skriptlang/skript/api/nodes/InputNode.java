@@ -37,7 +37,7 @@ public record InputNode(@NotNull String inputName) implements ExpressionNode<Var
 		}
 
 		@Override
-		public @NotNull InputNode create(List<SyntaxNode> children) {
+		public @NotNull InputNode create(List<SyntaxNode> children, int matchedPattern) {
 			return new InputNode(inputName);
 		}
 	}

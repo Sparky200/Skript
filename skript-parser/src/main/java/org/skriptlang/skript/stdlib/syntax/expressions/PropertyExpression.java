@@ -28,7 +28,7 @@ public final class PropertyExpression implements ExpressionNode<Variable.OfPrope
 		}
 
 		@Override
-		public @NotNull PropertyExpression create(List<SyntaxNode> children) {
+		public @NotNull PropertyExpression create(List<SyntaxNode> children, int matchedPattern) {
 			return new PropertyExpression(((TokenNode) children.getFirst()).token().asString(), (ExpressionNode<?>) children.get(1));
 		}
 	};
@@ -52,7 +52,13 @@ public final class PropertyExpression implements ExpressionNode<Variable.OfPrope
 			receiver = variable.get();
 		}
 
+		// TODO: need a way to feed an ExecuteResult out of an expression
+		if (receiver == null) throw new IllegalStateException("Cannot get property of a non-variable");
 		SkriptProperty<?, ?> prop = receiver.getType(context.runtime()).getProperty(propertyName);
+		if (prop == null) {
+			// TODO: SkriptValueType should have a type name
+			throw new IllegalStateException("Property '" + propertyName + "' does not exist on type '" + receiver.getType(context.runtime()) + "'");
+		}
 		return prop.asVariable(receiver);
 	}
 }

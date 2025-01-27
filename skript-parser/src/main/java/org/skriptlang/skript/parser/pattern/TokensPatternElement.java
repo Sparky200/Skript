@@ -33,7 +33,7 @@ public class TokensPatternElement extends PatternElement {
 			var newList = new LinkedList<Token>();
 			newList.addAll(existingSyntax.tokens());
 			newList.addAll(tokens);
-			return new TokenizedSyntax(nodeType, newList);
+			return new TokenizedSyntax(nodeType, existingSyntax.patternIndex(), newList);
 		}).toList();
 	}
 }

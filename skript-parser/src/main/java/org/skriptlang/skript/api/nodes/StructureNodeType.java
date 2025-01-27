@@ -17,13 +17,13 @@ public abstract class StructureNodeType<T extends StructureNode> implements Stat
 	}
 
 	@Override
-	@Contract(value = "_ -> new", pure = true)
-	public final @NotNull T create(@NotNull List<SyntaxNode> children) {
+	@Contract(value = "_, _ -> new", pure = true)
+	public final @NotNull T create(@NotNull List<SyntaxNode> children, int matchedPattern) {
 		SyntaxNode last = children.getLast();
 		if (last instanceof EntryStructureSectionNode(Map<String, StructureEntryNode> entries)) {
-			return create(children, entries);
+			return create(children, matchedPattern, entries);
 		}
-		return create(children, null);
+		return create(children, matchedPattern, null);
 	}
 
 	/**
@@ -32,5 +32,5 @@ public abstract class StructureNodeType<T extends StructureNode> implements Stat
 	 * @param entries the entries in the node, if this node uses entries.
 	 * @return the new node.
 	 */
-	protected abstract @NotNull T create(@NotNull List<SyntaxNode> children, @Nullable Map<String, StructureEntryNode> entries);
+	protected abstract @NotNull T create(@NotNull List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries);
 }

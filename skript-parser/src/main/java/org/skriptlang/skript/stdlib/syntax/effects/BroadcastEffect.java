@@ -18,7 +18,7 @@ public class BroadcastEffect implements EffectNode {
 		}
 
 		@Override
-		public @NotNull BroadcastEffect create(List<SyntaxNode> children) {
+		public @NotNull BroadcastEffect create(List<SyntaxNode> children, int matchedPattern) {
 			return new BroadcastEffect((ExpressionNode<?>) children.getFirst());
 		}
 	};

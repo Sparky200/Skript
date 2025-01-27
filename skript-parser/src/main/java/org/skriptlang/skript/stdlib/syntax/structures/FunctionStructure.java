@@ -21,7 +21,7 @@ public class FunctionStructure implements StructureNode {
 		}
 
 		@Override
-		public @NotNull FunctionStructure create(List<SyntaxNode> children, @Nullable Map<String, StructureEntryNode> entries) {
+		public @NotNull FunctionStructure create(List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
 			List<SyntaxNode> tokenNodesInParams = children.subList(1, children.size() - 2);
 			// TODO: params
 

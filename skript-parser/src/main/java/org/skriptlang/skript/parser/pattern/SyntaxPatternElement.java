@@ -50,7 +50,7 @@ public class SyntaxPatternElement extends PatternElement {
 		return existingSyntaxes.stream().map(existingSyntax -> {
 			var newList = new LinkedList<>(existingSyntax.tokens());
 			newList.add(new Token(TokenType.SYNTAX, this, -1, 0, null));
-			return new TokenizedSyntax(nodeType, newList);
+			return new TokenizedSyntax(nodeType, existingSyntax.patternIndex(), newList);
 		}).toList();
 	}
 }
