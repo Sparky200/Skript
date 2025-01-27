@@ -33,8 +33,8 @@ public final class CommandStructure implements StructureNode {
 			return entryStructure()
 				// these strings could be tokenized the same way as syntaxes
 				.entry("trigger", "trigger:<section::command>")
-				.entry("description", "description:<token::identifier>", true)
-				.entry("prefix", "prefix:<token::identifier>", true)
+				.entry("description", "description:<token::string>", true)
+				.entry("prefix", "prefix:<token::string>", true)
 				.build();
 		}
 

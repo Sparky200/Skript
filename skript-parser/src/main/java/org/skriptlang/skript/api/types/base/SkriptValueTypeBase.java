@@ -17,14 +17,14 @@ import java.util.Map;
 public class SkriptValueTypeBase<T extends SkriptValue> implements SkriptValueType<T> {
 	private final @NotNull SkriptRuntime runtime;
 	private final Class<T> valueClass;
-	private final SkriptValueType<?> superType;
+	private final SkriptValueType<? super T> superType;
 
 	private final Map<String, SkriptProperty<T, ?>> properties;
 
 	public SkriptValueTypeBase(
 		@NotNull SkriptRuntime runtime,
 		@NotNull Class<T> valueClass,
-		@Nullable SkriptValueType<?> superType,
+		@Nullable SkriptValueType<? super T> superType,
 		@NotNull Map<String, SkriptProperty<T, ?>> properties
 	) {
 		this.runtime = runtime;
@@ -57,12 +57,13 @@ public class SkriptValueTypeBase<T extends SkriptValue> implements SkriptValueTy
 
 	@Override
 	public boolean hasProperty(String name) {
-		return properties.containsKey(name);
+		return properties.containsKey(name) || (superType != null && superType.hasProperty(name));
 	}
 
 	@Override
-	public @Nullable SkriptProperty<T, ?> getProperty(String name) {
-		return properties.get(name);
+	public @Nullable SkriptProperty<? super T, ?> getProperty(String name) {
+		if (properties.containsKey(name)) return properties.get(name);
+		return superType != null ? superType.getProperty(name) : null;
 	}
 
 	@Override
