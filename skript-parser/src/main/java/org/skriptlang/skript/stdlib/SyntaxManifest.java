@@ -1,9 +1,7 @@
 package org.skriptlang.skript.stdlib;
 
 import org.skriptlang.skript.api.SkriptParser;
-import org.skriptlang.skript.stdlib.syntax.effects.BroadcastEffect;
-import org.skriptlang.skript.stdlib.syntax.effects.IncrementEffect;
-import org.skriptlang.skript.stdlib.syntax.effects.SetEffect;
+import org.skriptlang.skript.stdlib.syntax.effects.*;
 import org.skriptlang.skript.stdlib.syntax.expressions.NumberLiteralExpression;
 import org.skriptlang.skript.stdlib.syntax.expressions.PropertyExpression;
 import org.skriptlang.skript.stdlib.syntax.expressions.StringLiteralExpression;
@@ -28,6 +26,9 @@ public final class SyntaxManifest {
 		parser.submitNode(VariableExpression.TYPE);
 		parser.submitNode(SetEffect.TYPE);
 		parser.submitNode(IncrementEffect.TYPE);
+		parser.submitNode(DecrementEffect.TYPE);
+		parser.submitNode(AddEffect.TYPE);
+		parser.submitNode(RemoveEffect.TYPE);
 	}
 
 }
