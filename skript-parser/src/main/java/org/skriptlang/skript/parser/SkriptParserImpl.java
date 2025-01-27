@@ -91,7 +91,7 @@ public final class SkriptParserImpl implements SkriptParser {
 	}
 
 	@Override
-	public @NotNull ResultWithDiagnostics<SyntaxNode> parse(@NotNull ScriptSource source) {
+	public @NotNull ResultWithDiagnostics<SectionNode> parse(@NotNull ScriptSource source) {
 		if (!lockAccess.isLocked()) {
 			throw new IllegalStateException("The parser is not locked and cannot parse.");
 		}

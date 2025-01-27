@@ -3,14 +3,13 @@ package org.skriptlang.skript.api.runtime;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
-import org.skriptlang.skript.api.script.ScriptSource;
+import org.skriptlang.skript.api.script.Script;
 import org.skriptlang.skript.api.types.NoneValue;
 import org.skriptlang.skript.api.types.SkriptValue;
 import org.skriptlang.skript.api.types.Variable;
 import org.skriptlang.skript.api.util.ExecuteResult;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -34,7 +33,7 @@ public interface ExecuteContext {
 	 * Gets the script that this context is executing.
 	 * May be null if this context is beyond the script level.
 	 */
-	@Nullable ScriptSource script();
+	@Nullable Script script();
 
 	/**
 	 * Gets the parent context of this context.

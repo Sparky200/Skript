@@ -8,6 +8,7 @@ import org.skriptlang.skript.api.entries.StructureEntryNode;
 import org.skriptlang.skript.api.nodes.*;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.scope.SectionScope;
+import org.skriptlang.skript.api.types.ErrorValue;
 import org.skriptlang.skript.api.util.ExecuteResult;
 import org.skriptlang.skript.api.util.SectionUtils;
 import org.skriptlang.skript.parser.pattern.SyntaxPatternElement;
@@ -112,7 +113,7 @@ public final class CommandStructure implements StructureNode {
 	private @NotNull ExecuteResult executeCommand(@NotNull ExecuteContext context, @NotNull Object event) {
 		ExecuteContext baseTriggerContext = context.getScriptData(this, ExecuteContext.class);
 		if (baseTriggerContext == null) {
-			return ExecuteResult.failure(new IllegalStateException("Command cannot be executed because it previously failed to load"));
+			return ExecuteResult.failure(new ErrorValue("Command cannot be executed because it previously failed to load"));
 		}
 		ExecuteContext thisTrigger = baseTriggerContext.fork();
 

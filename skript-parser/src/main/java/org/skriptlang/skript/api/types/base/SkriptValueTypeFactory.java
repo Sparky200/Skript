@@ -41,7 +41,7 @@ public class SkriptValueTypeFactory<T extends SkriptValue> {
 	}
 
 	public StagedSkriptValueType<T> build() {
-		return new StagedSkriptValueType<>(tClass, typeName, superTypeName, Map.of());
+		return new StagedSkriptValueType<>(tClass, typeName, superTypeName, properties);
 	}
 
 	/**

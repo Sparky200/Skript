@@ -5,14 +5,13 @@ import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
-import org.skriptlang.skript.api.script.ScriptSource;
+import org.skriptlang.skript.api.script.Script;
 import org.skriptlang.skript.api.types.SkriptValue;
 import org.skriptlang.skript.api.types.Variable;
 import org.skriptlang.skript.api.util.ExecuteResult;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ExecuteContextImpl implements ExecuteContext {
@@ -43,7 +42,7 @@ public class ExecuteContextImpl implements ExecuteContext {
 	}
 
 	@Override
-	public @Nullable ScriptSource script() {
+	public @Nullable Script script() {
 		return parent != null ? parent.script() : null;
 	}
 

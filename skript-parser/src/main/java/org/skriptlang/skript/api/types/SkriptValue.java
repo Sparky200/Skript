@@ -130,4 +130,14 @@ public class SkriptValue implements SkriptValueOrVariable {
 	public boolean decrementDirectly() {
 		return false;
 	}
+
+	@Override
+	public final SkriptValue toValue() {
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return "<object>";
+	}
 }

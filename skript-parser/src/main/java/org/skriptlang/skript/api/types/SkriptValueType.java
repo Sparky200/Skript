@@ -68,5 +68,9 @@ public interface SkriptValueType<T extends SkriptValue> {
 	 */
 	@Nullable SkriptProperty<T, ?> getProperty(String name);
 
+	/**
+	 * Get the JVM class that this type represents.
+	 */
+	@NotNull Class<T> valueClass();
 
 }

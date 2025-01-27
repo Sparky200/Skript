@@ -9,8 +9,11 @@ import java.util.Map;
 
 /**
  * Represents a {@code <none>} value.
+ * <p>
+ * Note that NoneValue works a little differently from other types and does not use the staged type system.
  */
 public final class NoneValue extends SkriptValue {
+	public static final String TYPE_NAME = "none";
 
 	private static final NoneValue INSTANCE = new NoneValue();
 
@@ -26,8 +29,8 @@ public final class NoneValue extends SkriptValue {
 	public static final class Type extends SkriptValueTypeBase<NoneValue> {
 		private final SkriptProperty<NoneValue, NoneValue> property = new PropagatingProperty(runtime());
 
-		public Type(SkriptRuntime runtime) {
-			super(runtime, null, Map.of());
+		public Type(SkriptRuntime runtime, SkriptValueType<?> superType) {
+			super(runtime, NoneValue.class, superType, Map.of());
 		}
 
 		@Override

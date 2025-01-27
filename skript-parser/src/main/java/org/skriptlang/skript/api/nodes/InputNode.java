@@ -44,6 +44,8 @@ public record InputNode(@NotNull String inputName) implements ExpressionNode<Var
 
 	@Override
 	public @NotNull Variable resolve(@NotNull ExecuteContext context) {
+		if (!context.hasLiteralVariable(inputName()))
+			throw new IllegalStateException("Input " + inputName() + " is unexpectedly not present in the context (syntax and node executor not in sync?)");
 		return Objects.requireNonNull(context.getLiteralVariable(inputName));
 	}
 }
