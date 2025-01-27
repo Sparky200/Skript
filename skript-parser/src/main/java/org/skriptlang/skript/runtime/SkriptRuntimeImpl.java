@@ -51,6 +51,15 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 	}
 
 	@Override
+	public @NotNull String getNameOfType(@NotNull SkriptValueType<?> type) {
+		return typesByName.entrySet().stream()
+			.filter(entry -> entry.getValue() == type)
+			.findFirst()
+			.orElseThrow()
+			.getKey();
+	}
+
+	@Override
 	public <T extends SkriptValue> @NotNull SkriptValueType<T> addType(@NotNull StagedSkriptValueType<T> type) {
 		if (lockAccess.isLocked()) throw new IllegalStateException("Cannot add type after runtime is locked");
 		if (typesByName.containsKey(type.typeName())) throw new IllegalArgumentException("Type with name " + type.typeName() + " already exists");

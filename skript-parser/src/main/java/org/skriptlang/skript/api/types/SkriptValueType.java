@@ -27,6 +27,10 @@ public interface SkriptValueType<T extends SkriptValue> {
 	 */
 	@Nullable SkriptValueType<?> superType();
 
+	default @NotNull String name() {
+		return runtime().getNameOfType(this);
+	}
+
 	/**
 	 * Check if the value is an instance of this type.
 	 * <p>

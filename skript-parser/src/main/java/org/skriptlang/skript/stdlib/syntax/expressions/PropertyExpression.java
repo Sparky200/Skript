@@ -6,10 +6,7 @@ import org.skriptlang.skript.api.nodes.ExpressionNodeType;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.nodes.TokenNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
-import org.skriptlang.skript.api.types.SkriptProperty;
-import org.skriptlang.skript.api.types.SkriptValue;
-import org.skriptlang.skript.api.types.SkriptValueOrVariable;
-import org.skriptlang.skript.api.types.Variable;
+import org.skriptlang.skript.api.types.*;
 
 import java.util.List;
 
@@ -54,10 +51,13 @@ public final class PropertyExpression implements ExpressionNode<Variable.OfPrope
 
 		// TODO: need a way to feed an ExecuteResult out of an expression
 		if (receiver == null) throw new IllegalStateException("Cannot get property of a non-variable");
-		SkriptProperty<?, ?> prop = receiver.getType(context.runtime()).getProperty(propertyName);
+
+		SkriptValueType<?> type = receiver.getType(context.runtime());
+
+		SkriptProperty<?, ?> prop = type.getProperty(propertyName);
 		if (prop == null) {
 			// TODO: SkriptValueType should have a type name
-			throw new IllegalStateException("Property '" + propertyName + "' does not exist on type '" + receiver.getType(context.runtime()) + "'");
+			throw new IllegalStateException("Property '" + propertyName + "' does not exist on type '" + type.name() + "'");
 		}
 		return prop.asVariable(receiver);
 	}
