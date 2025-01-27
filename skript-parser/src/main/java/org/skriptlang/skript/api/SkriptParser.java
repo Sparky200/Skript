@@ -1,6 +1,7 @@
 package org.skriptlang.skript.api;
 
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.api.nodes.SectionNode;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
 import org.skriptlang.skript.api.scope.SectionScope;
@@ -40,5 +41,5 @@ public interface SkriptParser {
 	 */
 	List<SyntaxNodeType<?>> getNodeTypes();
 
-	ResultWithDiagnostics<SyntaxNode> parse(ScriptSource source);
+	ResultWithDiagnostics<SectionNode> parse(ScriptSource source);
 }

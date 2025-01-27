@@ -2,6 +2,7 @@ package org.skriptlang.skript.api.util;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.api.types.ErrorValue;
 
 /**
  * The result of executing a statement.
@@ -10,12 +11,8 @@ import org.jetbrains.annotations.NotNull;
  * which indicates this statement did not critically fail,
  * and execution should continue.
  * <p>
- * A failed execution should return a {@link Failure} using {@link #failure(Throwable)},
+ * A failed execution should return a {@link Failure} using {@link #failure(ErrorValue)},
  * which should contain a reason for the failure.
- * <p>
- * TODO:
- * In the future, this throwable will likely be replaced
- * with a Skript error value, which is usable in the Skript runtime.
  */
 public sealed interface ExecuteResult permits ExecuteResult.Success, ExecuteResult.Failure {
 	/**
@@ -37,7 +34,7 @@ public sealed interface ExecuteResult permits ExecuteResult.Success, ExecuteResu
 	 * Returns a failed execution with the given reason.
 	 * @param reason The reason for the failure.
 	 */
-	static @NotNull Failure failure(@NotNull Throwable reason) {
+	static @NotNull Failure failure(@NotNull ErrorValue reason) {
 		return new Failure(reason);
 	}
 
@@ -47,7 +44,7 @@ public sealed interface ExecuteResult permits ExecuteResult.Success, ExecuteResu
 	final class Success implements ExecuteResult {
 		private Success() {}
 	}
-	record Failure(Throwable throwable) implements ExecuteResult {}
+	record Failure(ErrorValue reason) implements ExecuteResult {}
 
 
 

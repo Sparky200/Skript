@@ -16,16 +16,19 @@ import java.util.Map;
  */
 public class SkriptValueTypeBase<T extends SkriptValue> implements SkriptValueType<T> {
 	private final @NotNull SkriptRuntime runtime;
+	private final Class<T> valueClass;
 	private final SkriptValueType<?> superType;
 
 	private final Map<String, SkriptProperty<T, ?>> properties;
 
 	public SkriptValueTypeBase(
 		@NotNull SkriptRuntime runtime,
+		@NotNull Class<T> valueClass,
 		@Nullable SkriptValueType<?> superType,
 		@NotNull Map<String, SkriptProperty<T, ?>> properties
 	) {
 		this.runtime = runtime;
+		this.valueClass = valueClass;
 		this.superType = superType;
 		this.properties = ImmutableMap.copyOf(properties);
 	}
@@ -62,5 +65,8 @@ public class SkriptValueTypeBase<T extends SkriptValue> implements SkriptValueTy
 		return properties.get(name);
 	}
 
-
+	@Override
+	public @NotNull Class<T> valueClass() {
+		return valueClass;
+	}
 }

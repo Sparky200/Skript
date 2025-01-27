@@ -19,6 +19,4 @@ public record SectionNode(List<StatementNode> children) implements SyntaxNode {
 	public SectionNode(List<StatementNode> children) {
 		this.children = ImmutableList.copyOf(children);
 	}
-
-
 }

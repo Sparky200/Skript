@@ -1,5 +1,6 @@
 package org.skriptlang.skript.api.types;
 
+import com.google.common.collect.ImmutableMap;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 import org.skriptlang.skript.api.types.base.SkriptValueTypeBase;
 
@@ -19,7 +20,7 @@ public final class StagedSkriptValueType<T extends SkriptValue> {
 		this.valueClass = valueClass;
 		this.typeName = typeName;
 		this.superTypeName = superTypeName;
-		this.properties = properties;
+		this.properties = ImmutableMap.copyOf(properties);
 	}
 
 	public Class<T> valueClass() {
@@ -43,7 +44,7 @@ public final class StagedSkriptValueType<T extends SkriptValue> {
 	public SkriptValueType<T> construct(SkriptRuntime runtime) {
 		SkriptValueType<?> superType = runtime.getTypeByName(superTypeName);
 
-		return new SkriptValueTypeBase<>(runtime, superType, properties.entrySet().stream()
+		return new SkriptValueTypeBase<>(runtime, valueClass, superType, properties.entrySet().stream()
 			.map(e -> Map.entry(e.getKey(), e.getValue().construct(runtime)))
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
 		);

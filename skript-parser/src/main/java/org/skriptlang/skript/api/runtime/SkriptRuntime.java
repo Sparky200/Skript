@@ -2,6 +2,9 @@ package org.skriptlang.skript.api.runtime;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.api.nodes.SyntaxNode;
+import org.skriptlang.skript.api.script.Script;
+import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.types.*;
 
 /**
@@ -60,5 +63,18 @@ public interface SkriptRuntime {
 	 * @param <TValue> the type of the value
 	 */
 	@NotNull <TReceiver extends SkriptValue, TValue extends SkriptValue> Variable.OfProperty<TReceiver, TValue> wrapProperty(SkriptProperty<TReceiver, TValue> property, TReceiver receiver);
+
+	/**
+	 * Loads a script into the runtime.
+	 * @param script the script to load
+	 * @return the execute context that represents this script in this runtime, or null if a structure failed.
+	 */
+	@Nullable ExecuteContext load(@NotNull Script script);
+
+	/**
+	 * Unloads a script from its root node.
+	 * @param script the script
+	 */
+	void unload(@NotNull Script script);
 
 }

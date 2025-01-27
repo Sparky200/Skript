@@ -73,6 +73,11 @@ public interface Variable extends SkriptValueOrVariable {
 
 	SkriptValueType<?> valueType();
 
+	@Override
+	default SkriptValue toValue() {
+		return get();
+	}
+
 	/**
 	 * A variable that's wrapped around some {@link SkriptProperty}.
 	 * This is essentially a wrapper around {@link SkriptProperty} for a specific receiver.

@@ -1,6 +1,7 @@
 package org.skriptlang.skript.api.types;
 
-import org.skriptlang.skript.api.script.ScriptSource;
+import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.api.script.Script;
 
 import static org.skriptlang.skript.api.types.base.SkriptPropertyFactory.skriptProperty;
 import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
@@ -22,7 +23,7 @@ public final class ScriptInfoValue extends SkriptValue {
 		return name;
 	}
 
-	public static ScriptInfoValue ofSource(ScriptSource source) {
-		return new ScriptInfoValue(new StringValue(source.name()));
+	public static ScriptInfoValue ofSource(@NotNull Script source) {
+		return new ScriptInfoValue(new StringValue(source.source().name()));
 	}
 }

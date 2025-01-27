@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
-import org.skriptlang.skript.api.script.ScriptSource;
+import org.skriptlang.skript.api.script.Script;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,21 +14,21 @@ import java.util.Map;
  * Context belonging to a script itself.
  */
 public class ScriptContext extends ExecuteContextImpl {
-	private final @NotNull ScriptSource script;
+	private final @Nullable Script script;
 
 	private final Map<SyntaxNode, Object> scriptData = new LinkedHashMap<>();
 
-	public ScriptContext(@NotNull SkriptRuntime runtime, @NotNull ScriptSource script, @Nullable ExecuteContext parent) {
+	public ScriptContext(@NotNull SkriptRuntime runtime, @Nullable Script script, @Nullable ExecuteContext parent) {
 		super(runtime, parent);
 		this.script = script;
 	}
 
-	public ScriptContext(@NotNull SkriptRuntime runtime, @NotNull ScriptSource script) {
+	public ScriptContext(@NotNull SkriptRuntime runtime, @Nullable Script script) {
 		this(runtime, script, null);
 	}
 
 	@Override
-	public @Nullable ScriptSource script() {
+	public @Nullable Script script() {
 		return script;
 	}
 

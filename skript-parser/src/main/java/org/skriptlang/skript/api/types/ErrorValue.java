@@ -1,5 +1,6 @@
 package org.skriptlang.skript.api.types;
 
+import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.types.base.SkriptValueTypeFactory;
 
 import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
@@ -20,5 +21,9 @@ public class ErrorValue extends SkriptValue {
 
 	public StringValue message() {
 		return message;
+	}
+
+	public static @NotNull ErrorValue of(Throwable throwable) {
+		return new ErrorValue(throwable.getMessage());
 	}
 }

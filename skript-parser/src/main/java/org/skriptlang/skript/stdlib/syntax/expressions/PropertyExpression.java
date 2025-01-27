@@ -46,10 +46,10 @@ public final class PropertyExpression implements ExpressionNode<Variable.OfPrope
 		SkriptValueOrVariable receiverOrVar = receiverSelector.resolve(context);
 
 		SkriptValue receiver = null;
-		if (receiverOrVar instanceof SkriptValue) {
-			receiver = (SkriptValue) receiverOrVar;
-		} else if (receiverOrVar instanceof Variable.OfProperty<?,?>) {
-			receiver = ((Variable.OfProperty<?,?>) receiverOrVar).get();
+		if (receiverOrVar instanceof SkriptValue val) {
+			receiver = val;
+		} else if (receiverOrVar instanceof Variable variable) {
+			receiver = variable.get();
 		}
 
 		SkriptProperty<?, ?> prop = receiver.getType(context.runtime()).getProperty(propertyName);

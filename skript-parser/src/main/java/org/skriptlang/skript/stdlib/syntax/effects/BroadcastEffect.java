@@ -31,7 +31,7 @@ public class BroadcastEffect implements EffectNode {
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {
-		System.out.println("BROADCAST: " + valueSelector.resolve(context));
+		System.out.println("BROADCAST: " + valueSelector.resolve(context).toValue());
 		return ExecuteResult.success();
 	}
 }
