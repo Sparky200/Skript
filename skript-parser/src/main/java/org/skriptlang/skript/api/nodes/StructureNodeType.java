@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.entries.EntryStructureDefinition;
 import org.skriptlang.skript.api.entries.StructureEntryNode;
-import org.skriptlang.skript.api.entries.EntryStructureSectionNode;
+import org.skriptlang.skript.api.entries.StructureSectionNode;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ public abstract class StructureNodeType<T extends StructureNode> implements Stat
 	@Contract(value = "_, _ -> new", pure = true)
 	public final @NotNull T create(@NotNull List<SyntaxNode> children, int matchedPattern) {
 		SyntaxNode last = children.getLast();
-		if (last instanceof EntryStructureSectionNode(Map<String, StructureEntryNode> entries)) {
+		if (last instanceof StructureSectionNode(Map<String, StructureEntryNode> entries)) {
 			return create(children, matchedPattern, entries);
 		}
 		return create(children, matchedPattern, null);

@@ -51,26 +51,26 @@ public final class CommandStructure implements StructureNode {
 			SectionNode triggerSection = (SectionNode) trigger.children().getFirst();
 
 			StructureEntryNode descriptionNode = entries.get("description");
-			TokenNode description = descriptionNode == null ? null : (TokenNode) descriptionNode.children().getFirst();
+			StringNode description = descriptionNode == null ? null : (StringNode) descriptionNode.children().getFirst();
 
 			StructureEntryNode prefixNode = entries.get("prefix");
-			TokenNode prefix = prefixNode == null ? null : (TokenNode) prefixNode.children().getFirst();
+			StringNode prefix = prefixNode == null ? null : (StringNode) prefixNode.children().getFirst();
 
 			return new CommandStructure(
 				name,
 				triggerSection,
-				description != null ? description.token().asString() : "",
-				prefix != null ? prefix.token().asString() : null
+				description,
+				prefix
 			);
 		}
 	};
 
 	private final @NotNull String name;
 	private final SectionNode trigger;
-	private final @NotNull String description;
-	private final @Nullable String prefix;
+	private final @NotNull StringNode description;
+	private final @Nullable StringNode prefix;
 
-	public CommandStructure(@NotNull String name, SectionNode trigger, @NotNull String description, @Nullable String prefix) {
+	public CommandStructure(@NotNull String name, SectionNode trigger, @NotNull StringNode description, @Nullable StringNode prefix) {
 		this.name = name;
 		this.trigger = trigger;
 		this.description = description;

@@ -21,6 +21,13 @@ public interface SyntaxNodeType<T extends SyntaxNode> {
 	@Contract(value = "_, _ -> new", pure = true)
 	@NotNull T create(List<SyntaxNode> children, int matchedPattern);
 
+	/**
+	 * Whether this node type can be parsed in the current context.
+	 * This must be deterministic.
+	 * @param context The current parsing context.
+	 * @param matchedPattern The index of the syntax pattern that was matched.
+	 * @return Whether this node type can be parsed.
+	 */
 	default boolean canBeParsed(ParseContext context, int matchedPattern) {
 		return true;
 	}

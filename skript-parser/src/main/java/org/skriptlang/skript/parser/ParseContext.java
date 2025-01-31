@@ -1,36 +1,34 @@
 package org.skriptlang.skript.parser;
 
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
 import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.util.ScriptDiagnostic;
-import org.skriptlang.skript.api.util.ImmutableDeque;
 import org.skriptlang.skript.parser.tokens.Token;
 import org.skriptlang.skript.parser.tokens.TokenType;
 
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * A stack plus context of a script being parsed.
  */
 public class ParseContext {
 	private final @NotNull ScriptSource source;
-	private final @NotNull List<ScriptDiagnostic> diagnostics;
 
 	private final Deque<Section> sections = new LinkedList<>();
 
-	private final Deque<SyntaxNodeType<?>> contextStack = new LinkedList<>();
+	private final Deque<Context> contextStack = new LinkedList<>();
 
 	private final Deque<SyntaxFrame> syntaxFrames = new LinkedList<>();
 
-	public ParseContext(@NotNull ScriptSource source, @NotNull List<ScriptDiagnostic> diagnostics) {
+	public ParseContext(@NotNull ScriptSource source) {
 		this.source = source;
-		this.diagnostics = diagnostics;
+		contextStack.push(new Context(null, 0));
 	}
 
 	public @NotNull ScriptSource source() {
@@ -38,19 +36,19 @@ public class ParseContext {
 	}
 
 	public void diagnostic(@NotNull ScriptDiagnostic diagnostic) {
-		diagnostics.add(diagnostic);
+		currentContext().diagnostic(diagnostic);
 	}
 
 	public void info(@NotNull String message, int index) {
-		diagnostics.add(ScriptDiagnostic.info(source, message, index));
+		currentContext().diagnostic(ScriptDiagnostic.info(source, message, index));
 	}
 
 	public void warning(@NotNull String message, int index) {
-		diagnostics.add(ScriptDiagnostic.warning(source, message, index));
+		currentContext().diagnostic(ScriptDiagnostic.warning(source, message, index));
 	}
 
 	public void error(@NotNull String message, int index) {
-		diagnostics.add(ScriptDiagnostic.error(source, message, index));
+		currentContext().diagnostic(ScriptDiagnostic.error(source, message, index));
 	}
 
 	public Section currentSection() {
@@ -91,13 +89,13 @@ public class ParseContext {
 
 			// validate there is whitespace
 			if (whitespace.type() != TokenType.WHITESPACE) {
-				diagnostics.add(ScriptDiagnostic.error(source, "Expected whitespace", whitespace.start()));
+				currentContext().diagnostic(ScriptDiagnostic.error(source, "Expected whitespace", whitespace.start()));
 				return;
 			}
 
 			// validate the whitespace is newline
 			if (!whitespace.asString().contains("\n")) {
-				diagnostics.add(ScriptDiagnostic.error(source, "Expected newline", whitespace.start()));
+				currentContext().diagnostic(ScriptDiagnostic.error(source, "Expected newline", whitespace.start()));
 				return;
 			}
 
@@ -110,7 +108,7 @@ public class ParseContext {
 			//noinspection ConstantConditions
 			int prevInterval = newDepth > 1 ? prevSection.getIndent() / (newDepth - 1) : prevSection.getIndent();
 			if (prevInterval != 0 && indent % prevInterval != 0) {
-				diagnostics.add(ScriptDiagnostic.error(source, "Indentation must be a multiple of " + prevInterval, whitespace.start()));
+				currentContext().diagnostic(ScriptDiagnostic.error(source, "Indentation must be a multiple of " + prevInterval, whitespace.start()));
 				return;
 			}
 
@@ -128,16 +126,20 @@ public class ParseContext {
 		sections.pop();
 	}
 
-	public void push(SyntaxNodeType<?> node) {
-		contextStack.push(node);
+	public void push(Context context) {
+		contextStack.push(context);
 	}
 
 	public void pop() {
 		contextStack.pop();
 	}
 
-	public Deque<SyntaxNodeType<?>> currentContext() {
-	    return new ImmutableDeque<>(contextStack);
+	public Context currentContext() {
+	    return contextStack.peek();
+	}
+
+	public Deque<Context> contextStack() {
+		return contextStack;
 	}
 
 	public void pushSyntaxFrame(List<TokenizedSyntax> syntaxes) {
@@ -167,6 +169,34 @@ public class ParseContext {
 
 		public @Nullable SectionScope scope() {
 			return scope;
+		}
+	}
+
+	public static class Context {
+		private final @Nullable SyntaxNodeType<?> node;
+		private final int childIndex;
+
+		private final List<ScriptDiagnostic> diagnostics = new LinkedList<>();
+
+		public Context(@Nullable SyntaxNodeType<?> node, int childIndex) {
+			this.node = node;
+			this.childIndex = childIndex;
+		}
+
+		public void diagnostic(@NotNull ScriptDiagnostic diagnostic) {
+			diagnostics.add(diagnostic);
+		}
+
+		public List<ScriptDiagnostic> diagnostics() {
+			return ImmutableList.copyOf(diagnostics);
+		}
+
+		public @Nullable SyntaxNodeType<?> node() {
+			return node;
+		}
+
+		public int childIndex() {
+			return childIndex;
 		}
 	}
 

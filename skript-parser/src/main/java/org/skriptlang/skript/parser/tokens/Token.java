@@ -22,7 +22,7 @@ public record Token(
 	@NotNull Object value,
 	int start,
 	int length,
-	@Nullable List<Token> children
+	@Nullable List<List<Token>> children
 ) {
 
 	/**
