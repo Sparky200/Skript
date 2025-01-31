@@ -422,7 +422,10 @@ public class Tokenizer {
 		if (first == '"') {
 			int end = index + 1;
 			boolean escaped = false;
-			List<Token> children = new LinkedList<>();
+			List<List<Token>> children = new LinkedList<>();
+			StringBuilder base = new StringBuilder();
+
+			int lastTemplateEnd = -1;
 
 			while (end < content.length()) {
 				char current = content.charAt(end);
@@ -435,15 +438,19 @@ public class Tokenizer {
 				} else if (current == '\\') {
 					escaped = true;
 				} else if (current == '"') {
+					base.append(content, lastTemplateEnd != -1 ? lastTemplateEnd : index, end + 1);
 					break;
 				} else if (current == '%') {
+					base.append(content, lastTemplateEnd != -1 ? lastTemplateEnd : index, end);
+					base.append("%s");
 					int templateStart = end;
 					end++;
+					List<Token> templateTokens = new LinkedList<>();
 					while (end < content.length() && content.charAt(end) != '%') {
 						Token childToken = nextToken(source, diagnostics, content, end);
 						if (childToken != null) {
 							lastTokenWasNull = false;
-							children.add(childToken);
+							templateTokens.add(childToken);
 							end = childToken.end();
 						} else {
 							if (!lastTokenWasNull)
@@ -458,7 +465,11 @@ public class Tokenizer {
 					}
 					if (end < content.length() && content.charAt(end) == '%') {
 						end++;
+						templateTokens.removeIf(it -> it.type() == TokenType.WHITESPACE);
+						children.add(templateTokens);
+						lastTemplateEnd = end;
 					} else {
+						// TODO fail case, no closing %
 						break;
 					}
 					continue;
@@ -468,7 +479,7 @@ public class Tokenizer {
 
 			if (end < content.length() && content.charAt(end) == '"') {
 				end++;
-				return new Token(TokenType.STRING, content.substring(index, end), index, end - index, children);
+				return new Token(TokenType.STRING, base.toString().replace("\\\"", "\""), index, end - index, children);
 			}
 		}
 

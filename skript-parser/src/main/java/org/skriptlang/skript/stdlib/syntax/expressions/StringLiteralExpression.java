@@ -1,10 +1,7 @@
 package org.skriptlang.skript.stdlib.syntax.expressions;
 
 import org.jetbrains.annotations.NotNull;
-import org.skriptlang.skript.api.nodes.ExpressionNode;
-import org.skriptlang.skript.api.nodes.ExpressionNodeType;
-import org.skriptlang.skript.api.nodes.SyntaxNode;
-import org.skriptlang.skript.api.nodes.TokenNode;
+import org.skriptlang.skript.api.nodes.*;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.StringValue;
 
@@ -24,18 +21,18 @@ public class StringLiteralExpression implements ExpressionNode<StringValue> {
 
 		@Override
 		public @NotNull StringLiteralExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new StringLiteralExpression(new StringValue(((TokenNode) children.getFirst()).token().asString()));
+			return new StringLiteralExpression((StringNode) children.getFirst());
 		}
 	};
 
-	private final StringValue value;
+	private final ExpressionNode<?> stringTokenSelector;
 
-	public StringLiteralExpression(StringValue value) {
-		this.value = value;
+	public StringLiteralExpression(ExpressionNode<?> stringTokenSelector) {
+		this.stringTokenSelector = stringTokenSelector;
 	}
 
 	@Override
 	public @NotNull StringValue resolve(@NotNull ExecuteContext context) {
-		return value;
+		return (StringValue) stringTokenSelector.resolve(context).toValue();
 	}
 }

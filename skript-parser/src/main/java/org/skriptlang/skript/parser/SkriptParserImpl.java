@@ -13,10 +13,7 @@ import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.util.ResultWithDiagnostics;
 import org.skriptlang.skript.api.util.ScriptDiagnostic;
 import org.skriptlang.skript.parser.pattern.SyntaxPatternElement;
-import org.skriptlang.skript.parser.tokens.Token;
-import org.skriptlang.skript.parser.tokens.TokenComparer;
-import org.skriptlang.skript.parser.tokens.TokenType;
-import org.skriptlang.skript.parser.tokens.Tokenizer;
+import org.skriptlang.skript.parser.tokens.*;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -115,10 +112,10 @@ public final class SkriptParserImpl implements SkriptParser {
 
 		var tokens = tokenizeResult.get();
 
-		ParseContext parseContext = new ParseContext(source, diagnostics);
-		parseContext.pushSyntaxFrame(tokenizedSyntaxes);
+		ParseContext parseContext = new ParseContext(source);
+		pushParseableSyntaxes(parseContext);
 
-		var fileNode = parseSection(parseContext, null, tokens, 0);
+		var fileNode = parseSection(parseContext, null, tokens);
 
 		if (parseContext.depth() != -1) {
 			diagnostics.add(ScriptDiagnostic.error(source, "Unbalanced sections (a section did not pop)", tokens.getLast().start()));
@@ -135,23 +132,22 @@ public final class SkriptParserImpl implements SkriptParser {
 
 	/**
 	 * Parses a section.
-	 * @param parseContext The parse stack containing the source, diagnostics, and other context on current parsing.
+	 * @param parseContext The parse context we are currently in.
 	 * @param tokens The tokens to parse.
-	 * @param start The index to start parsing at.
 	 * @return The parsed section, or null if failed.
 	 */
 	private @Nullable Match<SectionNode> parseSection(
 		ParseContext parseContext,
 		@Nullable SectionScope scope,
-		List<Token> tokens,
-		int start
+		List<Token> tokens
 	) {
 		// at head, we are just after a colon
 
-		int index = start;
+		int index = 0;
 
 		// if this section isn't the root of the file, it must start with certain whitespace rules
 		parseContext.pushSection(parseContext.depth() != -1 ? tokens.get(index++) : null, scope);
+		if (scope != null) pushInputs(parseContext, scope.inputs());
 
 		// depth is now 0
 
@@ -160,7 +156,7 @@ public final class SkriptParserImpl implements SkriptParser {
 		Token whitespace;
 		do {
 			if (index >= tokens.size()) break;
-			Match<StatementNode> next = parseStatement(parseContext, tokens, index, parseContext.depth() == 0 ? StructureNodeType.class : EffectNodeType.class);
+			Match<StatementNode> next = parseStatement(parseContext, tokens.subList(index, tokens.size()), parseContext.depth() == 0 ? StructureNodeType.class : EffectNodeType.class);
 			if (next == null) {
 				parseContext.info("Fail occurred in section depth " + parseContext.depth(), tokens.get(index).start());
 				parseContext.popSection();
@@ -180,152 +176,24 @@ public final class SkriptParserImpl implements SkriptParser {
 			index++;
 		} while (whitespace.asString().substring(whitespace.asString().lastIndexOf('\n') + 1).length() == parseContext.currentSection().getIndent());
 
+		if (scope != null) parseContext.popSyntaxFrame();
 		parseContext.popSection();
-		return new Match<>(new SectionNode(statements), index - start);
-	}
-
-	private @Nullable Match<EntryStructureSectionNode> parseEntrySection(
-		@NotNull ParseContext parseContext,
-		@Nullable SectionScope scope,
-		@NotNull List<Token> tokens,
-		int start
-	) {
-		SyntaxNodeType<?> structureSyntax = parseContext.currentContext().peek();
-		if (!(structureSyntax instanceof StructureNodeType<?> structure)) {
-			parseContext.error("Only structures can have entries", tokens.get(start).start());
-			return null;
-		}
-
-		EntryStructureDefinition definition = structure.structure();
-		if (definition == null) {
-			parseContext.error("Structure " + structure +
-				" must define a structure definition because it contains a syntax with <entries>",
-				tokens.get(start).start());
-			return null;
-		}
-
-		// defs will be removed from this as they are used
-		List<EntryDefinition> unusedEntries = new LinkedList<>(definition.entries());
-		List<EntryDefinition> usedEntries = new LinkedList<>();
-
-		Map<String, StructureEntryNode> entries = new LinkedHashMap<>();
-
-		int index = start;
-
-		parseContext.pushSection(tokens.get(index++), scope);
-		parseContext.pushSyntaxFrame(
-			unusedEntries.stream()
-				.map(StructureEntryNodeType::of)
-				// syntax allowed to use all features
-				.flatMap(nodeType -> {
-					var source = new SyntaxScriptSource(nodeType.getClass().getSimpleName(), nodeType.getSyntaxes().getFirst());
-					var result = Tokenizer.tokenizeSyntax(source, nodeType, 0);
-					if (!result.isSuccess()) {
-						throw new IllegalStateException("Fatal edge case: entry tokenization failed");
-					}
-					return result.get().stream();
-				})
-				.toList()
-		);
-
-		Token whitespace;
-		do {
-			if (index >= tokens.size()) break;
-			Match<StructureEntryNode> next = parseEntry(parseContext, tokens, index, unusedEntries);
-			if (next == null) {
-				parseContext.info("Fail occurred in section depth " + parseContext.depth(), tokens.get(index).start());
-				parseContext.popSection();
-				parseContext.popSyntaxFrame();
-				return null;
-			}
-
-			index += next.length();
-			EntryDefinition usedEntry = unusedEntries.stream()
-				.filter(entry -> entry.name().equals(next.node().name()))
-				.findFirst().orElse(null);
-
-			if (usedEntry == null) throw new IllegalStateException("parseEntry should validate that the entry is allowed");
-
-			usedEntries.add(usedEntry);
-			unusedEntries.remove(usedEntry);
-
-			entries.put(next.node().name(), next.node());
-			if (index >= tokens.size()) break;
-			whitespace = tokens.get(index);
-			// entry might have consumed the whitespace
-			if (whitespace.type() != TokenType.WHITESPACE) whitespace = tokens.get(--index);
-			if (whitespace.type() != TokenType.WHITESPACE || !whitespace.asString().contains("\n")) {
-				parseContext.error("Expected newline after effect", tokens.get(index).start());
-				parseContext.popSection();
-				parseContext.popSyntaxFrame();
-				return null;
-			}
-			index++;
-		} while (whitespace.asString().substring(whitespace.asString().lastIndexOf('\n') + 1).length() == parseContext.currentSection().getIndent());
-
-		parseContext.popSection();
-		parseContext.popSyntaxFrame();
-
-		if (unusedEntries.stream().anyMatch(entry -> !entry.optional())) {
-			parseContext.error("Missing required entries: " + unusedEntries.stream()
-				.filter(entry -> !entry.optional())
-				.map(EntryDefinition::name)
-				.toList(),
-				tokens.get(index).start()
-			);
-			return null;
-		}
-
-		return new Match<>(new EntryStructureSectionNode(entries), index - start);
-	}
-
-	private Match<StructureEntryNode> parseEntry(@NotNull ParseContext parseContext, @NotNull List<Token> tokens, int index, List<EntryDefinition> allowedEntries) {
-		List<TokenizedSyntax> candidates = findCandidates(parseContext, tokens.subList(index, tokens.size()), StructureEntryNodeType.class);
-
-		if (candidates.isEmpty()) {
-			parseContext.error("No entry matched", tokens.get(index).start());
-			return null;
-		}
-
-		return candidates.stream()
-			.map(candidate -> tryParse(parseContext, candidate, tokens.subList(index, tokens.size())))
-			.filter(Objects::nonNull)
-			.map(node -> {
-				if (node.node() instanceof StructureEntryNode entryNode)
-					return new Match<>(entryNode, node.length());
-				return null;
-			})
-			.filter(Objects::nonNull)
-			.filter(match -> {
-				EntryDefinition definition = allowedEntries.stream().filter(entry -> entry.name().equals(match.node().name())).findFirst().orElse(null);
-				if (definition == null) {
-					parseContext.error("Entry " + match.node().name() + " is not allowed", tokens.get(index).start());
-					return false;
-				}
-				// TODO: definition.validate(...) behavior may be interesting
-				return true;
-			})
-			.findFirst()
-			.orElse(null);
+		return new Match<>(new SectionNode(statements), index);
 	}
 
 	/**
 	 * Parses an effect. Only effects which consume an entire line will be allowed to succeed.
 	 * @param parseContext The parse stack containing the source, diagnostics, and other context on current parsing.
 	 * @param tokens The tokens to parse.
-	 * @param start The index to start parsing at.
 	 * @param superType The super type to bound candidates to.
 	 * @return The parsed effect, or null if failed.
 	 */
 	private @Nullable Match<StatementNode> parseStatement(
 		@NotNull ParseContext parseContext,
 		List<Token> tokens,
-		int start,
 		Class<?> superType
 	) {
-		int index = start;
-		int end = index + tokens.stream()
-			.skip(index)
+		int end = tokens.stream()
 			.map(token -> token.type() == TokenType.WHITESPACE && token.asString().contains("\n"))
 			.toList()
 			.indexOf(true);
@@ -333,29 +201,30 @@ public final class SkriptParserImpl implements SkriptParser {
 		// edge case: this is the last line of the script, and there is no newline. therefore, the effect goes to the end.
 		if (end == -1) end = tokens.size();
 
-		if (end <= index) {
+		if (end == 0) {
 			// normal; there is not another effect
 			return null;
 		}
 
-		List<Token> effectTokens = tokens.subList(index, Math.min(end + 1, tokens.size()));
+		List<Token> singleLineTokens = tokens.subList(0, Math.min(end + 1, tokens.size()));
 		// This edge case shouldn't even occur
 		// because the tokenizer does not output duplicate newline-containing whitespace tokens
-		if (effectTokens.isEmpty()) {
-			parseContext.error("Expected effect", tokens.get(index).start());
+		if (singleLineTokens.isEmpty()) {
+			parseContext.error("Expected effect", tokens.getFirst().start());
 			return null;
 		}
 
-		List<TokenizedSyntax> candidates = findCandidates(parseContext, effectTokens, superType);
+		List<TokenizedSyntax> candidates = findCandidates(parseContext, singleLineTokens, superType);
 
 		if (candidates.isEmpty()) {
-			parseContext.error("No statement matched", tokens.get(index).start());
+			parseContext.error("No statement matched", tokens.getFirst().start());
 			return null;
 		}
 
+		int finalEnd = end;
 		Stream<Match<SyntaxNode>> candidateNodes = candidates.stream()
 			// attempt to parse each candidate
-			.map(candidate -> tryParse(parseContext, candidate, tokens.subList(index, tokens.size())))
+			.map(candidate -> parseCandidate(parseContext, candidate, tokens.subList(0, hasSection(candidate) ? tokens.size() : finalEnd)))
 			// filter to successful parses
 			.filter(Objects::nonNull);
 
@@ -371,161 +240,293 @@ public final class SkriptParserImpl implements SkriptParser {
 			.orElse(null);
 	}
 
-	private @NotNull List<Match<ExpressionNode<?>>> parseExpression(
-		@NotNull ParseContext parseContext,
-		@NotNull List<Token> tokens,
-		int start
-	) {
-		int index = start;
-
-		List<TokenizedSyntax> candidates = findCandidates(parseContext, tokens.subList(index, tokens.size()), ExpressionNodeType.class);
-
-		if (candidates.isEmpty()) {
-			parseContext.error("No expression matched", tokens.get(index).start());
-			return List.of();
-		}
-
-		return (List<Match<ExpressionNode<?>>>) candidates.stream()
-			.filter(candidate -> candidate.nodeType().canBeParsed(parseContext, candidate.patternIndex()))
-			.map(candidate -> tryParse(parseContext, candidate, tokens.subList(index, tokens.size())))
-			.filter(Objects::nonNull)
-			.map(node -> {
-				if (node.node() instanceof ExpressionNode<?> exprNode)
-					return new Match<ExpressionNode<?>>(exprNode, node.length());
-				return null;
-			})
-			.filter(Objects::nonNull)
-			.toList();
-	}
-
-	/**
-	 * Tries to parse the given tokens which matched the given tokenized syntax to a syntax node.
-	 * @param parseContext The parse stack containing the source, diagnostics, and other context on current parsing.
-	 * @param tokenizedSyntax The tokenized syntax that matched the tokens.
-	 * @param tokens The tokens to parse.
-	 * @return The parsed syntax node, or null if failed.
-	 */
-	private @Nullable Match<SyntaxNode> tryParse(
-		@NotNull ParseContext parseContext,
-		@NotNull TokenizedSyntax tokenizedSyntax,
+	private Match<SyntaxNode> parseCandidate(
+		@NotNull ParseContext context,
+		@NotNull TokenizedSyntax candidate,
 		@NotNull List<Token> tokens
 	) {
 
-		// push this node onto context while we work with it
-		parseContext.push(tokenizedSyntax.nodeType());
+		List<Token> syntaxTokens = candidate.tokens();
 
-		int tokenIndex = 0;
-		int syntaxIndex = 0;
 		List<SyntaxNode> children = new LinkedList<>();
 
-		for (Token token : tokenizedSyntax.tokens()) {
-			if (token.type() != TokenType.SYNTAX) {
+		int tokenIndex = 0;
+		for (int i = 0; i < syntaxTokens.size(); i++) {
+			Token syntaxToken = syntaxTokens.get(i);
+			if (syntaxToken.type() != TokenType.SYNTAX) {
 				tokenIndex++;
-				syntaxIndex++;
 				continue;
 			}
 
-			SyntaxPatternElement element = (SyntaxPatternElement) token.value();
+			SyntaxPatternElement element = (SyntaxPatternElement) syntaxToken.value();
 
-			// whether to push a generic frame containing the pattern's inputs
-			// this is if it's not a section and if it has inputs
-			// sections use their own scope system
-			boolean shouldPushGenericFrame = !element.inputs().isEmpty() && !element.syntaxType().equals("section");
-
-			if (shouldPushGenericFrame) {
-				pushInputs(parseContext, element.inputs());
+			List<Token> subTokens;
+			if (element.syntaxType().equals("section") || element.syntaxType().equals("entries")) {
+				if (i != syntaxTokens.size() - 1) {
+					context.error("Section or entries syntax must be at the end of a pattern", syntaxToken.start());
+					return null;
+				}
+				subTokens = tokens.subList(tokenIndex, tokens.size());
+			} else {
+				subTokens = tokens.subList(tokenIndex, tokenIndex + findEnd(
+					tokens.subList(tokenIndex, tokens.size()),
+					syntaxTokens.subList(i + 1, syntaxTokens.size())
+				));
+				if (
+					!subTokens.isEmpty()
+						&& subTokens.getFirst().asPunctuation() == Punctuation.OPEN_PARENTHESIS
+						&& subTokens.getLast().asPunctuation() == Punctuation.CLOSE_PARENTHESIS) {
+					subTokens = subTokens.subList(1, subTokens.size() - 1);
+					tokenIndex += 2;
+				}
 			}
 
-			switch (element.syntaxType()) {
-				case "token" -> {
-					TokenType target = TokenType.fromName(element.output());
-					if (tokens.get(tokenIndex).type() != target) {
-						parseContext.error("Expected " + target + " but got " + tokens.get(tokenIndex).type(), tokens.get(tokenIndex).start());
-						return null;
-					}
-					children.add(new TokenNode(tokens.get(tokenIndex)));
-					tokenIndex++;
-				}
-				case "expr" -> {
-					List<Match<ExpressionNode<?>>> expressionCandidates = parseExpression(parseContext, tokens, tokenIndex);
-					if (expressionCandidates.isEmpty()) return null;
-
-					final int fuckYouJava = tokenIndex;
-					final int fuckYouJava2 = syntaxIndex;
-					Match<ExpressionNode<?>> expression = expressionCandidates.stream()
-						.filter(candidate -> {
-								int nextTokenIndex = fuckYouJava + candidate.length();
-								if (nextTokenIndex >= tokens.size()) return false;
-
-								return TokenComparer.canMatch(tokenizedSyntax.tokens().subList(fuckYouJava2, tokenizedSyntax.tokens().size()), tokens.subList(nextTokenIndex, tokens.size()));
-							})
-						.max(Comparator.comparingInt(Match::length))
-						.orElse(null);
-
-					if (expression == null) {
-						parseContext.error("No expression matched", tokens.get(tokenIndex).start());
-						return null;
-					}
-
-					children.add(expression.node());
-					tokenIndex += expression.length();
-				}
-				case "effect" -> {
-					Match<StatementNode> effect = parseStatement(parseContext, tokens, tokenIndex, EffectNodeType.class);
-					if (effect == null) return null;
-					children.add(effect.node());
-					tokenIndex += effect.length();
-				}
-				case "condition" -> {
-					throw new UnsupportedOperationException("TODO conditions");
-				}
-				case "section" -> {
-					String scopeName = element.inputs().size() == 1 ? element.inputs().getFirst().name() : null;
-					SectionScope scope = null;
-					if (scopeName != null) {
-						scope = scopes.stream().filter(s -> s.name().equals(scopeName)).findFirst().orElse(null);
-						if (scope == null) {
-							parseContext.error("Unknown scope " + scopeName, tokens.get(tokenIndex).start());
-							return null;
-						}
-
-						pushInputs(parseContext, scope.inputs());
-					}
-					Match<SectionNode> section = parseSection(parseContext, scope, tokens, tokenIndex);
-					if (section == null) return null;
-					children.add(section.node());
-					tokenIndex += section.length();
-					if (scope != null) parseContext.popSyntaxFrame();
-				}
-				case "entries" -> {
-					String scopeName = element.inputs().size() == 1 ? element.inputs().getFirst().name() : null;
-					SectionScope scope = null;
-					if (scopeName != null) {
-						scope = scopes.stream().filter(s -> s.name().equals(scopeName)).findFirst().orElse(null);
-						if (scope == null) {
-							parseContext.error("Unknown scope " + scopeName, tokens.get(tokenIndex).start());
-							return null;
-						}
-					}
-					Match<EntryStructureSectionNode> entries = parseEntrySection(parseContext, scope, tokens, tokenIndex);
-					if (entries == null) return null;
-					children.add(entries.node());
-					tokenIndex += entries.length();
-				}
-				default -> throw new IllegalStateException("Unknown syntax type: " + element.syntaxType());
+			Match<? extends SyntaxNode> match = parseChild(context, candidate, subTokens, element, children.size());
+			if (match == null) {
+				context.error("Failed to parse child syntax", subTokens.getFirst().start());
+				return null;
 			}
 
-			if (shouldPushGenericFrame) {
-				parseContext.popSyntaxFrame();
-			}
-
-			syntaxIndex++;
+			children.add(match.node());
+			tokenIndex += match.length();
 		}
 
-		parseContext.pop();
+		if (tokenIndex != tokens.size() && !hasSection(candidate)) {
+			context.error("Failed to parse all tokens", tokens.get(tokenIndex).start());
+			return null;
+		}
 
-		// TODO: pass through result object to capture parse diagnostics
-		return new Match<>(tokenizedSyntax.nodeType().create(children, tokenizedSyntax.patternIndex()), tokenIndex);
+		return new Match<>(candidate.nodeType().create(children, candidate.patternIndex()), tokenIndex);
+	}
+
+	private int findEnd(
+		@NotNull List<Token> tokens,
+		@NotNull List<Token> syntaxTokens
+	) {
+		if (syntaxTokens.isEmpty() || syntaxTokens.stream().allMatch(it -> it.type() == TokenType.SYNTAX)) {
+			return tokens.size();
+		}
+
+		if (tokens.getFirst().asPunctuation() == Punctuation.OPEN_PARENTHESIS) {
+			Deque<Punctuation> parenStack = new LinkedList<>();
+			for (int i = 1; i < tokens.size(); i++) {
+				Token token = tokens.get(i);
+				if (token.asPunctuation() == Punctuation.OPEN_PARENTHESIS) {
+					parenStack.push(Punctuation.OPEN_PARENTHESIS);
+				} else if (token.asPunctuation() == Punctuation.CLOSE_PARENTHESIS) {
+					if (parenStack.isEmpty()) {
+						return i + 1;
+					}
+					parenStack.pop();
+				}
+			}
+		}
+
+		for (int i = 0; i < tokens.size(); i++) {
+			if (TokenComparer.canMatch(syntaxTokens, tokens.subList(i, tokens.size()))) {
+				return i;
+			}
+		}
+
+		return tokens.size();
+	}
+
+	private @Nullable Match<? extends SyntaxNode> parseChild(
+		@NotNull ParseContext context,
+		@NotNull TokenizedSyntax parentCandidate,
+		@NotNull List<Token> tokens,
+		@NotNull SyntaxPatternElement childElement,
+		int childIndex
+	) {
+		boolean hasInputs = !childElement.syntaxType().equals("section") && !childElement.inputs().isEmpty();
+
+		if (hasInputs) pushInputs(context, childElement.inputs());
+		pushParseableSyntaxes(context);
+
+		context.push(new ParseContext.Context(parentCandidate.nodeType(), childIndex));
+
+		Match<? extends SyntaxNode> match = null;
+		switch (childElement.syntaxType()) {
+			case "section" -> {
+				SectionScope scope = !childElement.inputs().isEmpty()
+					? scopes.stream()
+						.filter(s -> s.name().equals(childElement.inputs().getFirst().name()))
+						.findFirst().orElse(null)
+					: null;
+
+				match = parseSection(context, scope, tokens);
+			}
+			case "entries" -> {
+				if (!(parentCandidate.nodeType() instanceof StructureNodeType<?> structureType)) break;
+				match = parseEntries(context, tokens, structureType.structure());
+			}
+			case "effect" -> {
+				match = parseStatement(context, tokens, ExpressionNodeType.class);
+			}
+			case "expr" -> {
+				match = parseExpression(context, tokens);
+			}
+			case "token" -> {
+				if (tokens.size() != 1) break;
+				Token token = tokens.getFirst();
+				if (token.type() != TokenType.fromName(childElement.output())) break;
+
+				if (token.type() == TokenType.STRING) {
+					// special case for string tokens
+					List<ExpressionNode<?>> children = new LinkedList<>();
+					// TODO: string template context
+					for (List<Token> subTokens : Objects.requireNonNull(token.children())) {
+						Match<ExpressionNode<?>> expression = parseExpression(context, subTokens);
+						if (expression == null) {
+							context.error("Failed to parse string template expression", subTokens.getFirst().start());
+							return null;
+						}
+						children.add(expression.node());
+					}
+					match = new Match<>(new StringNode(token.asString(), children), 1);
+				} else
+					match = new Match<>(new TokenNode(tokens.getFirst()), 1);
+			}
+			default -> {
+				context.error("Unknown syntax type '" + childElement.syntaxType() + "' in pattern " + parentCandidate.patternIndex() + " of " + parentCandidate.nodeType(), tokens.getFirst().start());
+			}
+		}
+
+		context.pop();
+
+		context.popSyntaxFrame();
+		if (hasInputs) context.popSyntaxFrame();
+
+		return match;
+	}
+
+	private Match<ExpressionNode<?>> parseExpression(
+		@NotNull ParseContext context,
+		@NotNull List<Token> tokens
+	) {
+		List<TokenizedSyntax> candidates = findCandidates(context, tokens, ExpressionNodeType.class);
+		if (candidates.isEmpty()) {
+			context.error("No possible expression", tokens.getFirst().start());
+			return null;
+		}
+
+		List<Match<SyntaxNode>> candidateNodes = candidates.stream()
+			.map(candidate -> parseCandidate(context, candidate, tokens))
+			.filter(Objects::nonNull).toList();
+
+		// TODO: make MultiMatchNode if necessary
+		Match<SyntaxNode> selected = candidateNodes.stream().findFirst().orElse(null);
+		if (selected == null) return null;
+		return new Match<>((ExpressionNode<?>) selected.node(), selected.length());
+	}
+
+	private Match<StructureSectionNode> parseEntries(
+		@NotNull ParseContext context,
+		@NotNull List<Token> tokens,
+		@Nullable EntryStructureDefinition structure
+	) {
+		if (structure == null) return null;
+
+		Map<String, StructureEntryNode> entries = new LinkedHashMap<>();
+		Map<String, EntryDefinition> used = new LinkedHashMap<>();
+		Map<String, EntryDefinition> unused = new LinkedHashMap<>();
+
+		structure.entries().forEach(it -> unused.put(it.name(), it));
+
+		context.pushSection(tokens.getFirst(), null);
+		context.pushSyntaxFrame(
+			unused.values().stream()
+				.map(StructureEntryNodeType::of)
+				// syntax allowed to use all features
+				.flatMap(nodeType -> {
+					var source = new SyntaxScriptSource(nodeType.getClass().getSimpleName(), nodeType.getSyntaxes().getFirst());
+					var result = Tokenizer.tokenizeSyntax(source, nodeType, 0);
+					if (!result.isSuccess()) {
+						throw new IllegalStateException("Fatal edge case: entry tokenization failed");
+					}
+					return result.get().stream();
+				})
+				.toList()
+		);
+
+		// start after whitespace
+		int index = 1;
+
+		Token whitespace;
+		do {
+			if (index >= tokens.size()) break;
+			Match<StructureEntryNode> next = parseEntry(context, tokens.subList(index, tokens.size()), unused);
+			if (next == null) {
+				context.info("Fail occurred in section depth " + context.depth(), tokens.get(index).start());
+				context.popSection();
+				return null;
+			}
+			index += next.length();
+			entries.put(next.node().name(), next.node());
+			EntryDefinition def = unused.remove(next.node().name());
+			used.put(next.node().name(), def);
+
+			if (index >= tokens.size()) break;
+			whitespace = tokens.get(index);
+			// statement might have consumed the whitespace
+			if (whitespace.type() != TokenType.WHITESPACE) whitespace = tokens.get(--index);
+			if (whitespace.type() != TokenType.WHITESPACE || !whitespace.asString().contains("\n")) {
+				context.error("Expected newline after effect", tokens.get(index).start());
+				context.popSection();
+				context.popSyntaxFrame();
+				return null;
+			}
+			index++;
+		} while (whitespace.asString().substring(whitespace.asString().lastIndexOf('\n') + 1).length() == context.currentSection().getIndent());
+
+		context.popSyntaxFrame();
+		context.popSection();
+
+		if (unused.values().stream().anyMatch(entry -> !entry.optional())) {
+			context.error("Missing required entries: " + unused.values().stream()
+					.filter(entry -> !entry.optional())
+					.map(EntryDefinition::name)
+					.toList(),
+				tokens.get(index).start()
+			);
+			return null;
+		}
+
+		return new Match<>(new StructureSectionNode(entries), tokens.size());
+	}
+
+	private Match<StructureEntryNode> parseEntry(
+		@NotNull ParseContext context,
+		@NotNull List<Token> tokens,
+		@NotNull Map<String, EntryDefinition> unused
+	) {
+		List<TokenizedSyntax> candidates = findCandidates(context, tokens, StructureEntryNodeType.class);
+
+		if (candidates.isEmpty()) {
+			context.error("No entry matched", tokens.getFirst().start());
+			return null;
+		}
+
+		return candidates.stream()
+			.map(candidate -> parseCandidate(context, candidate, hasSection(candidate) ? tokens : tokens.subList(0, tokens.size() - 1)))
+			.filter(Objects::nonNull)
+			.map(node -> {
+				if (node.node() instanceof StructureEntryNode entryNode)
+					return new Match<>(entryNode, node.length());
+				return null;
+			})
+			.filter(Objects::nonNull)
+			.filter(match -> {
+				EntryDefinition definition = unused.get(match.node().name());
+				if (definition == null) {
+					context.error("Entry " + match.node().name() + " is not allowed", tokens.getFirst().start());
+					return false;
+				}
+				// TODO: definition.validate(...) behavior may be interesting
+				return true;
+			})
+			.findFirst()
+			.orElse(null);
 	}
 
 	private void pushInputs(@NotNull ParseContext parseContext, List<SyntaxPatternElement.Input> inputs) {
@@ -537,6 +538,14 @@ public final class SkriptParserImpl implements SkriptParser {
 			}
 			return result.get().getFirst();
 		}).toList());
+	}
+
+	private boolean hasSection(@NotNull TokenizedSyntax syntax) {
+		return syntax.tokens().stream().anyMatch(it -> {
+			if (it.type() != TokenType.SYNTAX) return false;
+			SyntaxPatternElement element = (SyntaxPatternElement) it.value();
+			return element.syntaxType().equals("section") || element.syntaxType().equals("entries");
+		});
 	}
 
 	/**
@@ -553,11 +562,21 @@ public final class SkriptParserImpl implements SkriptParser {
 		return context.availableSyntaxes().stream()
 			.filter(tokenizedSyntax -> superType.isInstance(tokenizedSyntax.nodeType()))
 			.filter(tokenizedSyntax -> tokenizedSyntax.canMatch(tokens))
+			.filter(tokenizedSyntax -> tokenizedSyntax.nodeType().canBeParsed(context, tokenizedSyntax.patternIndex()))
 			.toList();
 	}
 
-
-
+	private void pushParseableSyntaxes(@NotNull ParseContext context) {
+		List<TokenizedSyntax> alreadyAvailable = context.availableSyntaxes();
+		context.pushSyntaxFrame(
+			Objects.requireNonNull(tokenizedSyntaxes).stream()
+				.filter(it ->
+					!alreadyAvailable.contains(it)
+						&& it.nodeType().canBeParsed(context, it.patternIndex())
+				)
+				.toList()
+		);
+	}
 
 	/**
 	 * Lazily computes the tokenized syntaxes from the node types.

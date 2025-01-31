@@ -2,10 +2,7 @@ package org.skriptlang.skript.stdlib;
 
 import org.skriptlang.skript.api.SkriptParser;
 import org.skriptlang.skript.stdlib.syntax.effects.*;
-import org.skriptlang.skript.stdlib.syntax.expressions.NumberLiteralExpression;
-import org.skriptlang.skript.stdlib.syntax.expressions.PropertyExpression;
-import org.skriptlang.skript.stdlib.syntax.expressions.StringLiteralExpression;
-import org.skriptlang.skript.stdlib.syntax.expressions.VariableExpression;
+import org.skriptlang.skript.stdlib.syntax.expressions.*;
 import org.skriptlang.skript.stdlib.syntax.structures.CommandStructure;
 import org.skriptlang.skript.stdlib.syntax.structures.OnScriptLoadEvent;
 
@@ -29,6 +26,7 @@ public final class SyntaxManifest {
 		parser.submitNode(DecrementEffect.TYPE);
 		parser.submitNode(AddEffect.TYPE);
 		parser.submitNode(RemoveEffect.TYPE);
+		parser.submitNode(ListExpression.TYPE);
 	}
 
 }
