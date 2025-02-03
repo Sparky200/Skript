@@ -2,7 +2,6 @@ package org.skriptlang.skript.stdlib.syntax.structures;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.api.entries.EntryStructureSectionNode;
 import org.skriptlang.skript.api.entries.StructureEntryNode;
 import org.skriptlang.skript.api.nodes.*;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
