@@ -8,7 +8,6 @@ import org.skriptlang.skript.parser.tokens.Token;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A pattern element that is a list of tokens.

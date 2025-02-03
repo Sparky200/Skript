@@ -8,8 +8,10 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.skriptlang.skript.api.*;
 import org.skriptlang.skript.api.entries.*;
 import org.skriptlang.skript.api.nodes.*;
+import org.skriptlang.skript.api.scope.InputDefinition;
 import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.script.ScriptSource;
+import org.skriptlang.skript.api.util.LockAccess;
 import org.skriptlang.skript.api.util.ResultWithDiagnostics;
 import org.skriptlang.skript.api.util.ScriptDiagnostic;
 import org.skriptlang.skript.parser.pattern.SyntaxPatternElement;
@@ -112,12 +114,12 @@ public final class SkriptParserImpl implements SkriptParser {
 
 		var tokens = tokenizeResult.get();
 
-		ParseContext parseContext = new ParseContext(source);
-		pushParseableSyntaxes(parseContext);
+		ParseContextImpl parseContextImpl = new ParseContextImpl(source);
+		pushParseableSyntaxes(parseContextImpl);
 
-		var fileNode = parseSection(parseContext, null, tokens);
+		var fileNode = parseSection(parseContextImpl, null, tokens);
 
-		if (parseContext.depth() != -1) {
+		if (parseContextImpl.depth() != -1) {
 			diagnostics.add(ScriptDiagnostic.error(source, "Unbalanced sections (a section did not pop)", tokens.getLast().start()));
 			return ResultWithDiagnostics.failure(diagnostics);
 		}
@@ -132,12 +134,12 @@ public final class SkriptParserImpl implements SkriptParser {
 
 	/**
 	 * Parses a section.
-	 * @param parseContext The parse context we are currently in.
+	 * @param parseContextImpl The parse context we are currently in.
 	 * @param tokens The tokens to parse.
 	 * @return The parsed section, or null if failed.
 	 */
 	private @Nullable Match<SectionNode> parseSection(
-		ParseContext parseContext,
+		ParseContextImpl parseContextImpl,
 		@Nullable SectionScope scope,
 		List<Token> tokens
 	) {
@@ -146,8 +148,8 @@ public final class SkriptParserImpl implements SkriptParser {
 		int index = 0;
 
 		// if this section isn't the root of the file, it must start with certain whitespace rules
-		parseContext.pushSection(parseContext.depth() != -1 ? tokens.get(index++) : null, scope);
-		if (scope != null) pushInputs(parseContext, scope.inputs());
+		parseContextImpl.pushSection(parseContextImpl.depth() != -1 ? tokens.get(index++) : null, scope);
+		if (scope != null) pushInputs(parseContextImpl, scope.inputs());
 
 		// depth is now 0
 
@@ -156,10 +158,10 @@ public final class SkriptParserImpl implements SkriptParser {
 		Token whitespace;
 		do {
 			if (index >= tokens.size()) break;
-			Match<StatementNode> next = parseStatement(parseContext, tokens.subList(index, tokens.size()), parseContext.depth() == 0 ? StructureNodeType.class : EffectNodeType.class);
+			Match<StatementNode> next = parseStatement(parseContextImpl, tokens.subList(index, tokens.size()), parseContextImpl.depth() == 0 ? StructureNodeType.class : EffectNodeType.class);
 			if (next == null) {
-				parseContext.info("Fail occurred in section depth " + parseContext.depth(), tokens.get(index).start());
-				parseContext.popSection();
+				parseContextImpl.info("Fail occurred in section depth " + parseContextImpl.depth(), tokens.get(index).start());
+				parseContextImpl.popSection();
 				return null;
 			}
 			index += next.length();
@@ -169,27 +171,27 @@ public final class SkriptParserImpl implements SkriptParser {
 			// statement might have consumed the whitespace
 			if (whitespace.type() != TokenType.WHITESPACE) whitespace = tokens.get(--index);
 			if (whitespace.type() != TokenType.WHITESPACE || !whitespace.asString().contains("\n")) {
-				parseContext.error("Expected newline after effect", tokens.get(index).start());
-				parseContext.popSection();
+				parseContextImpl.error("Expected newline after effect", tokens.get(index).start());
+				parseContextImpl.popSection();
 				return null;
 			}
 			index++;
-		} while (whitespace.asString().substring(whitespace.asString().lastIndexOf('\n') + 1).length() == parseContext.currentSection().getIndent());
+		} while (whitespace.asString().substring(whitespace.asString().lastIndexOf('\n') + 1).length() == parseContextImpl.currentSection().getIndent());
 
-		if (scope != null) parseContext.popSyntaxFrame();
-		parseContext.popSection();
+		if (scope != null) parseContextImpl.popSyntaxFrame();
+		parseContextImpl.popSection();
 		return new Match<>(new SectionNode(statements), index);
 	}
 
 	/**
 	 * Parses an effect. Only effects which consume an entire line will be allowed to succeed.
-	 * @param parseContext The parse stack containing the source, diagnostics, and other context on current parsing.
+	 * @param parseContextImpl The parse stack containing the source, diagnostics, and other context on current parsing.
 	 * @param tokens The tokens to parse.
 	 * @param superType The super type to bound candidates to.
 	 * @return The parsed effect, or null if failed.
 	 */
 	private @Nullable Match<StatementNode> parseStatement(
-		@NotNull ParseContext parseContext,
+		@NotNull ParseContextImpl parseContextImpl,
 		List<Token> tokens,
 		Class<?> superType
 	) {
@@ -210,21 +212,21 @@ public final class SkriptParserImpl implements SkriptParser {
 		// This edge case shouldn't even occur
 		// because the tokenizer does not output duplicate newline-containing whitespace tokens
 		if (singleLineTokens.isEmpty()) {
-			parseContext.error("Expected effect", tokens.getFirst().start());
+			parseContextImpl.error("Expected effect", tokens.getFirst().start());
 			return null;
 		}
 
-		List<TokenizedSyntax> candidates = findCandidates(parseContext, singleLineTokens, superType);
+		List<TokenizedSyntax> candidates = findCandidates(parseContextImpl, singleLineTokens, superType);
 
 		if (candidates.isEmpty()) {
-			parseContext.error("No statement matched", tokens.getFirst().start());
+			parseContextImpl.error("No statement matched", tokens.getFirst().start());
 			return null;
 		}
 
 		int finalEnd = end;
 		Stream<Match<SyntaxNode>> candidateNodes = candidates.stream()
 			// attempt to parse each candidate
-			.map(candidate -> parseCandidate(parseContext, candidate, tokens.subList(0, hasSection(candidate) ? tokens.size() : finalEnd)))
+			.map(candidate -> parseCandidate(parseContextImpl, candidate, tokens.subList(0, hasSection(candidate) ? tokens.size() : finalEnd)))
 			// filter to successful parses
 			.filter(Objects::nonNull);
 
@@ -241,7 +243,7 @@ public final class SkriptParserImpl implements SkriptParser {
 	}
 
 	private Match<SyntaxNode> parseCandidate(
-		@NotNull ParseContext context,
+		@NotNull ParseContextImpl context,
 		@NotNull TokenizedSyntax candidate,
 		@NotNull List<Token> tokens
 	) {
@@ -332,7 +334,7 @@ public final class SkriptParserImpl implements SkriptParser {
 	}
 
 	private @Nullable Match<? extends SyntaxNode> parseChild(
-		@NotNull ParseContext context,
+		@NotNull ParseContextImpl context,
 		@NotNull TokenizedSyntax parentCandidate,
 		@NotNull List<Token> tokens,
 		@NotNull SyntaxPatternElement childElement,
@@ -343,7 +345,7 @@ public final class SkriptParserImpl implements SkriptParser {
 		if (hasInputs) pushInputs(context, childElement.inputs());
 		pushParseableSyntaxes(context);
 
-		context.push(new ParseContext.Context(parentCandidate.nodeType(), childIndex));
+		context.push(new ParseContextImpl.Context(parentCandidate.nodeType(), childIndex));
 
 		Match<? extends SyntaxNode> match = null;
 		switch (childElement.syntaxType()) {
@@ -385,7 +387,7 @@ public final class SkriptParserImpl implements SkriptParser {
 					}
 					match = new Match<>(new StringNode(token.asString(), children), 1);
 				} else
-					match = new Match<>(new TokenNode(tokens.getFirst()), 1);
+					match = new Match<>(new TokenNode(tokens.getFirst().asString()), 1);
 			}
 			default -> {
 				context.error("Unknown syntax type '" + childElement.syntaxType() + "' in pattern " + parentCandidate.patternIndex() + " of " + parentCandidate.nodeType(), tokens.getFirst().start());
@@ -401,7 +403,7 @@ public final class SkriptParserImpl implements SkriptParser {
 	}
 
 	private Match<ExpressionNode<?>> parseExpression(
-		@NotNull ParseContext context,
+		@NotNull ParseContextImpl context,
 		@NotNull List<Token> tokens,
 		@Nullable String desiredTypeName
 	) {
@@ -430,7 +432,7 @@ public final class SkriptParserImpl implements SkriptParser {
 	}
 
 	private Match<StructureSectionNode> parseEntries(
-		@NotNull ParseContext context,
+		@NotNull ParseContextImpl context,
 		@NotNull List<Token> tokens,
 		@Nullable EntryStructureDefinition structure
 	) {
@@ -505,7 +507,7 @@ public final class SkriptParserImpl implements SkriptParser {
 	}
 
 	private Match<StructureEntryNode> parseEntry(
-		@NotNull ParseContext context,
+		@NotNull ParseContextImpl context,
 		@NotNull List<Token> tokens,
 		@NotNull Map<String, EntryDefinition> unused
 	) {
@@ -538,8 +540,8 @@ public final class SkriptParserImpl implements SkriptParser {
 			.orElse(null);
 	}
 
-	private void pushInputs(@NotNull ParseContext parseContext, List<SyntaxPatternElement.Input> inputs) {
-		parseContext.pushSyntaxFrame(inputs.stream().map(input -> {
+	private void pushInputs(@NotNull ParseContextImpl parseContextImpl, List<InputDefinition> inputs) {
+		parseContextImpl.pushSyntaxFrame(inputs.stream().map(input -> {
 			InputNode.Type type = new InputNode.Type(input.name(), input.type());
 			var result = Tokenizer.tokenizeSyntax(new SyntaxScriptSource("input", input.name()), type, 0);
 			if (!result.isSuccess()) {
@@ -564,7 +566,7 @@ public final class SkriptParserImpl implements SkriptParser {
 	 * @return The candidates that can match the tokens.
 	 */
 	private @NotNull List<TokenizedSyntax> findCandidates(
-		@NotNull ParseContext context,
+		@NotNull ParseContextImpl context,
 		@NotNull List<Token> tokens,
 		@NotNull Class<?> superType
 	) {
@@ -575,7 +577,7 @@ public final class SkriptParserImpl implements SkriptParser {
 			.toList();
 	}
 
-	private void pushParseableSyntaxes(@NotNull ParseContext context) {
+	private void pushParseableSyntaxes(@NotNull ParseContextImpl context) {
 		List<TokenizedSyntax> alreadyAvailable = context.availableSyntaxes();
 		context.pushSyntaxFrame(
 			Objects.requireNonNull(tokenizedSyntaxes).stream()

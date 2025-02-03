@@ -4,5 +4,9 @@ plugins {
 }
 
 rootProject.name = 'Skript'
+include 'skript-api'
+include 'skript-stdlib'
 include 'skript-parser'
+include 'skript-runtime'
+include 'skript-engine'
 

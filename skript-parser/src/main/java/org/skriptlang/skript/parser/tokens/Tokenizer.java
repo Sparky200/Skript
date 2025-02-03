@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
+import org.skriptlang.skript.api.scope.InputDefinition;
 import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.util.ResultWithDiagnostics;
 import org.skriptlang.skript.api.util.ScriptDiagnostic;
@@ -169,7 +170,7 @@ public class Tokenizer {
 
 			// inputs or return type are present
 
-			List<SyntaxPatternElement.Input> inputs = new LinkedList<>();
+			List<InputDefinition> inputs = new LinkedList<>();
 
 			int index = 2;
 			while (index < tokens.size()) {
@@ -198,7 +199,7 @@ public class Tokenizer {
 					nextToken = tokens.get(index++);
 				}
 
-				inputs.add(new SyntaxPatternElement.Input(inputName, inputType));
+				inputs.add(new InputDefinition(inputName, inputType));
 
 				if (nextToken.asPunctuation() == Punctuation.COMMA) {
 					index++;
