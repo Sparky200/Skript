@@ -26,7 +26,7 @@ import java.util.Map;
  *         a section.
  *     </li>
  *     <li>
- *         The {@link StructureNodeType#create(List, Map)} method is called
+ *         The {@link StructureNodeType#create(List, int, Map)} method is called
  *         to create this structure.
  *     </li>
  * </ul>
