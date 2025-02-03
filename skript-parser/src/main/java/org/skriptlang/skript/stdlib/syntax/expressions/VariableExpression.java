@@ -27,7 +27,7 @@ public class VariableExpression implements ExpressionNode<SkriptValueOrVariable>
 
 		@Override
 		public @NotNull VariableExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new VariableExpression(((TokenNode) children.getFirst()).token().asString());
+			return new VariableExpression(((TokenNode) children.getFirst()).tokenContents());
 		}
 	};
 

@@ -3,7 +3,6 @@ package org.skriptlang.skript.api.nodes;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
-import org.skriptlang.skript.api.types.SkriptValue;
 import org.skriptlang.skript.api.types.Variable;
 
 import java.util.List;

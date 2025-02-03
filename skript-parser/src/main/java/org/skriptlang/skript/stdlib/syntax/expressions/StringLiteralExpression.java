@@ -1,7 +1,10 @@
 package org.skriptlang.skript.stdlib.syntax.expressions;
 
 import org.jetbrains.annotations.NotNull;
-import org.skriptlang.skript.api.nodes.*;
+import org.skriptlang.skript.api.nodes.ExpressionNode;
+import org.skriptlang.skript.api.nodes.ExpressionNodeType;
+import org.skriptlang.skript.api.nodes.StringNode;
+import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.StringValue;
 

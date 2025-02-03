@@ -2,7 +2,7 @@ package org.skriptlang.skript.api.nodes;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.skriptlang.skript.parser.ParseContext;
+import org.skriptlang.skript.api.ParseContext;
 
 import java.util.List;
 

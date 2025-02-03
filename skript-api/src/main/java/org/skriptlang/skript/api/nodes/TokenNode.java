@@ -1,9 +1,9 @@
 package org.skriptlang.skript.api.nodes;
 
 import org.jetbrains.annotations.NotNull;
-import org.skriptlang.skript.parser.tokens.Token;
 
 /**
  * A basic node wrapping around a single token.
+ * @param tokenContents The contents of the source token.
  */
-public record TokenNode(@NotNull Token token) implements SyntaxNode { }
+public record TokenNode(@NotNull String tokenContents) implements SyntaxNode { }

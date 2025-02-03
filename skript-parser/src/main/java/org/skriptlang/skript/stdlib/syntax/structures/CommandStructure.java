@@ -7,6 +7,7 @@ import org.skriptlang.skript.api.entries.EntryStructureDefinition;
 import org.skriptlang.skript.api.entries.StructureEntryNode;
 import org.skriptlang.skript.api.nodes.*;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
+import org.skriptlang.skript.api.scope.InputDefinition;
 import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.types.ErrorValue;
 import org.skriptlang.skript.api.util.ExecuteResult;
@@ -20,7 +21,7 @@ import static org.skriptlang.skript.api.entries.EntryStructureDefinition.entrySt
 
 public final class CommandStructure implements StructureNode {
 	public static final SectionScope SCOPE = new SectionScope("command", List.of(
-		new SyntaxPatternElement.Input("command", "command_data")
+		new InputDefinition("command", "command_data")
 	));
 
 	public static final StructureNodeType<CommandStructure> TYPE = new StructureNodeType<>() {
@@ -42,7 +43,7 @@ public final class CommandStructure implements StructureNode {
 		protected @NotNull CommandStructure create(@NotNull List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
 			Preconditions.checkNotNull(entries, "Commands contractually expect entries");
 
-			String name = ((TokenNode) children.getFirst()).token().asString();
+			String name = ((TokenNode) children.getFirst()).tokenContents();
 
 			StructureEntryNode trigger = entries.get("trigger");
 			if (trigger == null) {

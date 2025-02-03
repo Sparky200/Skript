@@ -25,9 +25,9 @@ public class FunctionStructure implements StructureNode {
 			// TODO: params
 
 			return new FunctionStructure(
-				((TokenNode) children.getFirst()).token().asString(),
+				((TokenNode) children.getFirst()).tokenContents(),
 				(SectionNode) children.getLast(),
-				((TokenNode) children.get(children.size() - 2)).token().asString()
+				((TokenNode) children.get(children.size() - 2)).tokenContents()
 			);
 		}
 	};

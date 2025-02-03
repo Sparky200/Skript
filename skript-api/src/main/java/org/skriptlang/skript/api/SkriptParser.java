@@ -2,7 +2,6 @@ package org.skriptlang.skript.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.SectionNode;
-import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
 import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.script.ScriptSource;

@@ -2,9 +2,7 @@ package org.skriptlang.skript.api.runtime;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.script.Script;
-import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.types.*;
 
 /**

@@ -8,9 +8,6 @@ import org.skriptlang.skript.api.nodes.ExpressionNode;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.ErrorValue;
-import org.skriptlang.skript.api.types.SkriptValue;
-import org.skriptlang.skript.api.types.SkriptValueOrVariable;
-import org.skriptlang.skript.api.types.Variable;
 import org.skriptlang.skript.api.util.ExecuteResult;
 import org.skriptlang.skript.api.util.TypeOperationUtils;
 

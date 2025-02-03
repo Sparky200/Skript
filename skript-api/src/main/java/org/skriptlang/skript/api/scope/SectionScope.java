@@ -1,7 +1,6 @@
 package org.skriptlang.skript.api.scope;
 
 import com.google.common.collect.ImmutableList;
-import org.skriptlang.skript.parser.pattern.SyntaxPatternElement;
 
 import java.util.List;
 
@@ -13,8 +12,8 @@ import java.util.List;
  * <p>
  * This is passed to the parser separate from nodes.
  */
-public record SectionScope(String name, List<SyntaxPatternElement.Input> inputs) {
-	public SectionScope(String name, List<SyntaxPatternElement.Input> inputs) {
+public record SectionScope(String name, List<InputDefinition> inputs) {
+	public SectionScope(String name, List<InputDefinition> inputs) {
 		this.name = name;
 		this.inputs = ImmutableList.copyOf(inputs);
 	}
@@ -38,9 +37,8 @@ public record SectionScope(String name, List<SyntaxPatternElement.Input> inputs)
 	 *
 	 * @return The inputs of the scope.
 	 */
-	// TODO: should not use Input from SPE
 	@Override
-	public List<SyntaxPatternElement.Input> inputs() {
+	public List<InputDefinition> inputs() {
 		return inputs;
 	}
 }

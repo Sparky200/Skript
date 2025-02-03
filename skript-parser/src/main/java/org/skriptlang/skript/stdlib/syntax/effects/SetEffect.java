@@ -41,7 +41,7 @@ public class SetEffect implements EffectNode {
 			if (receiverSelector instanceof VariableExpression varExpr) {
 				// this case covers a special case
 				// where a variable expression will return NoneValue because the variable is not set.
-				// since it's the set expression, we just create a new variable.
+				// since it's the set effect, we just create a new variable.
 				variable = context.setVariable(varExpr.name());
 			} else {
 				return ExecuteResult.failure(new ErrorValue("Cannot set <none> to a value"));

@@ -9,6 +9,7 @@ import org.skriptlang.skript.api.nodes.StructureNode;
 import org.skriptlang.skript.api.nodes.StructureNodeType;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
+import org.skriptlang.skript.api.scope.InputDefinition;
 import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.types.ScriptInfoValue;
 import org.skriptlang.skript.api.util.ExecuteResult;
@@ -21,7 +22,7 @@ import java.util.Map;
 
 public class OnScriptLoadEvent implements StructureNode {
 	public static final SectionScope SCOPE = new SectionScope("scriptloadevent", List.of(
-		new SyntaxPatternElement.Input("event-script", "script_info")
+		new InputDefinition("event-script", "script_info")
 	));
 
 	public static final StructureNodeType<OnScriptLoadEvent> TYPE = new StructureNodeType<>() {

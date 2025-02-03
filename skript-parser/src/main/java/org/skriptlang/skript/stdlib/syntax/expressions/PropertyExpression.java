@@ -26,7 +26,7 @@ public final class PropertyExpression implements ExpressionNode<Variable.OfPrope
 
 		@Override
 		public @NotNull PropertyExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new PropertyExpression(((TokenNode) children.getFirst()).token().asString(), (ExpressionNode<?>) children.get(1));
+			return new PropertyExpression(((TokenNode) children.getFirst()).tokenContents(), (ExpressionNode<?>) children.get(1));
 		}
 	};
 

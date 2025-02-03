@@ -3,10 +3,8 @@ package org.skriptlang.skript.parser;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.SyntaxNodeType;
-import org.skriptlang.skript.parser.pattern.SyntaxPatternElement;
 import org.skriptlang.skript.parser.tokens.Token;
 import org.skriptlang.skript.parser.tokens.TokenComparer;
-import org.skriptlang.skript.parser.tokens.TokenType;
 
 import java.util.*;
 
