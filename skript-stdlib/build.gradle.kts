@@ -16,9 +16,6 @@ dependencies {
 	implementation("org.jetbrains:annotations:26.0.1")
 
 	implementation(project(":skript-api"))
-	implementation(project(":skript-parser"))
-	implementation(project(":skript-runtime"))
-	implementation(project(":skript-stdlib"))
 
 }
 

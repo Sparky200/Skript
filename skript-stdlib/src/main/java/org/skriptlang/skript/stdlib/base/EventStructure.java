@@ -1,4 +1,4 @@
-package org.skriptlang.skript.stdlib.syntax.base;
+package org.skriptlang.skript.stdlib.base;
 
 import org.skriptlang.skript.api.nodes.StructureNode;
 

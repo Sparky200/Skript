@@ -1,4 +1,4 @@
-package org.skriptlang.skript.stdlib.syntax.effects;
+package org.skriptlang.skript.stdlib.effects;
 
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.EffectNode;

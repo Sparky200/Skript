@@ -1,4 +1,4 @@
-package org.skriptlang.skript.stdlib.syntax.effects;
+package org.skriptlang.skript.stdlib.effects;
 
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.EffectNode;
@@ -8,7 +8,7 @@ import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.*;
 import org.skriptlang.skript.api.util.ExecuteResult;
-import org.skriptlang.skript.stdlib.syntax.expressions.VariableExpression;
+import org.skriptlang.skript.stdlib.expressions.VariableExpression;
 
 import java.util.List;
 

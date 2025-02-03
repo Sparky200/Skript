@@ -1,4 +1,4 @@
-package org.skriptlang.skript.stdlib.syntax.expressions;
+package org.skriptlang.skript.stdlib.expressions;
 
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.ExpressionNode;

@@ -1,4 +1,4 @@
-package org.skriptlang.skript.stdlib.syntax.base;
+package org.skriptlang.skript.stdlib.base;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

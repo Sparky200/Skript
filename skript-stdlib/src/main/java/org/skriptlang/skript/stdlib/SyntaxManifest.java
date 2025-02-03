@@ -1,10 +1,10 @@
 package org.skriptlang.skript.stdlib;
 
 import org.skriptlang.skript.api.SkriptParser;
-import org.skriptlang.skript.stdlib.syntax.effects.*;
-import org.skriptlang.skript.stdlib.syntax.expressions.*;
-import org.skriptlang.skript.stdlib.syntax.structures.CommandStructure;
-import org.skriptlang.skript.stdlib.syntax.structures.OnScriptLoadEvent;
+import org.skriptlang.skript.stdlib.effects.*;
+import org.skriptlang.skript.stdlib.expressions.*;
+import org.skriptlang.skript.stdlib.structures.CommandStructure;
+import org.skriptlang.skript.stdlib.structures.OnScriptLoadEvent;
 
 public final class SyntaxManifest {
 	private SyntaxManifest() {

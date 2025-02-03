@@ -1,4 +1,4 @@
-package org.skriptlang.skript.stdlib.syntax.structures;
+package org.skriptlang.skript.stdlib.structures;
 
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,6 @@ import org.skriptlang.skript.api.types.ScriptInfoValue;
 import org.skriptlang.skript.api.util.ExecuteResult;
 import org.skriptlang.skript.api.util.Priority;
 import org.skriptlang.skript.api.util.SectionUtils;
-import org.skriptlang.skript.parser.pattern.SyntaxPatternElement;
 
 import java.util.List;
 import java.util.Map;
