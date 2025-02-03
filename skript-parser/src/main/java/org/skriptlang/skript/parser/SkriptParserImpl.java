@@ -364,7 +364,7 @@ public final class SkriptParserImpl implements SkriptParser {
 				match = parseStatement(context, tokens, ExpressionNodeType.class);
 			}
 			case "expr" -> {
-				match = parseExpression(context, tokens);
+				match = parseExpression(context, tokens, childElement.output());
 			}
 			case "token" -> {
 				if (tokens.size() != 1) break;
@@ -376,7 +376,7 @@ public final class SkriptParserImpl implements SkriptParser {
 					List<ExpressionNode<?>> children = new LinkedList<>();
 					// TODO: string template context
 					for (List<Token> subTokens : Objects.requireNonNull(token.children())) {
-						Match<ExpressionNode<?>> expression = parseExpression(context, subTokens);
+						Match<ExpressionNode<?>> expression = parseExpression(context, subTokens, "string");
 						if (expression == null) {
 							context.error("Failed to parse string template expression", subTokens.getFirst().start());
 							return null;
@@ -402,7 +402,8 @@ public final class SkriptParserImpl implements SkriptParser {
 
 	private Match<ExpressionNode<?>> parseExpression(
 		@NotNull ParseContext context,
-		@NotNull List<Token> tokens
+		@NotNull List<Token> tokens,
+		@Nullable String desiredTypeName
 	) {
 		List<TokenizedSyntax> candidates = findCandidates(context, tokens, ExpressionNodeType.class);
 		if (candidates.isEmpty()) {
@@ -412,9 +413,17 @@ public final class SkriptParserImpl implements SkriptParser {
 
 		List<Match<SyntaxNode>> candidateNodes = candidates.stream()
 			.map(candidate -> parseCandidate(context, candidate, tokens))
-			.filter(Objects::nonNull).toList();
+			.filter(Objects::nonNull)
+			.filter(it -> it.length() == tokens.size())
+			.toList();
 
-		// TODO: make MultiMatchNode if necessary
+		if (candidateNodes.size() > 1) {
+			return new Match<>(new MultiMatchExpressionNode(
+				candidateNodes.stream().map(it -> (ExpressionNode<?>) it.node()).toList(),
+				desiredTypeName
+			), tokens.size());
+		}
+
 		Match<SyntaxNode> selected = candidateNodes.stream().findFirst().orElse(null);
 		if (selected == null) return null;
 		return new Match<>((ExpressionNode<?>) selected.node(), selected.length());
