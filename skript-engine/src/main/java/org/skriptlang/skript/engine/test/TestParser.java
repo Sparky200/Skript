@@ -1,18 +1,21 @@
-package org.skriptlang.skript.test;
+package org.skriptlang.skript.engine.test;
 
-import org.skriptlang.skript.api.*;
-import org.skriptlang.skript.api.nodes.*;
+import org.skriptlang.skript.api.SkriptParser;
+import org.skriptlang.skript.api.nodes.SectionNode;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
+import org.skriptlang.skript.api.script.FileScriptSource;
+import org.skriptlang.skript.api.script.Script;
 import org.skriptlang.skript.api.script.ScriptSource;
-import org.skriptlang.skript.api.script.StringScriptSource;
 import org.skriptlang.skript.api.types.*;
 import org.skriptlang.skript.api.util.ResultWithDiagnostics;
 import org.skriptlang.skript.api.util.ScriptDiagnostic;
-import org.skriptlang.skript.parser.LockAccess;
+import org.skriptlang.skript.api.util.LockAccess;
 import org.skriptlang.skript.parser.SkriptParserImpl;
 import org.skriptlang.skript.runtime.ScriptImpl;
 import org.skriptlang.skript.runtime.SkriptRuntimeImpl;
 import org.skriptlang.skript.stdlib.SyntaxManifest;
+
+import java.nio.file.Path;
 
 public class TestParser {
 	public static void main(String[] args) {
@@ -26,21 +29,13 @@ public class TestParser {
 		for (int i = 0; i < 100; i++) {
 			long start = System.nanoTime();
 
-			ScriptSource source = new StringScriptSource(
-				"test.sk",
-				"""
-					on script load:
-						broadcast name of event-script
-						broadcast length of name of event-script
-						broadcast event-script
-					
-					"""
-			);
+			ScriptSource source = new FileScriptSource(Path.of("beans.sk"));
 
 			ResultWithDiagnostics<SectionNode> result = parser.parse(source);
 
 			if (result.isSuccess()) {
 				System.out.println("Successfully parsed script!");
+				System.out.println("Parse took " + (System.nanoTime() - start) / 1_000_000.0 + "ms (" + (System.nanoTime() - start) + ")");
 
 				LockAccess runtimeLockAccess = new LockAccess();
 				SkriptRuntime runtime = new SkriptRuntimeImpl(runtimeLockAccess);
@@ -52,7 +47,11 @@ public class TestParser {
 				runtime.addType(ErrorValue.TYPE);
 				runtime.addType(ScriptInfoValue.TYPE);
 
-				runtime.load(new ScriptImpl(source, result.get()));
+				Script script = new ScriptImpl(source, result.get());
+
+				var execResult = runtime.load(script);
+
+				runtime.unload(script);
 
 			} else {
 				System.out.println("Failed to parse script: ");
@@ -61,7 +60,7 @@ public class TestParser {
 				}
 			}
 
-			System.out.println("Took " + (System.nanoTime() - start) / 1_000_000 + "ms (" + (System.nanoTime() - start) + ")");
+			System.out.println("Took " + (System.nanoTime() - start) / 1_000_000.0 + "ms (" + (System.nanoTime() - start) + ")");
 		}
 
 	}

@@ -1,8 +1,11 @@
-package org.skriptlang.skript.parser;
+package org.skriptlang.skript.api.util;
+
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * A class that allows delegating lock control to an orchestrator.
  */
+@ApiStatus.Internal
 public final class LockAccess {
 	private volatile boolean locked = false;
 

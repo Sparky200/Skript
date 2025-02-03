@@ -6,4 +6,6 @@ plugins {
 rootProject.name = 'Skript'
 include 'skript-parser'
 include 'skript-api'
+include 'skript-runtime'
+include 'skript-engine'
 

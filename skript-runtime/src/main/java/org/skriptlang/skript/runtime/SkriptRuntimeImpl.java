@@ -7,8 +7,8 @@ import org.skriptlang.skript.api.runtime.SkriptRuntime;
 import org.skriptlang.skript.api.script.Script;
 import org.skriptlang.skript.api.types.*;
 import org.skriptlang.skript.api.util.ExecuteResult;
+import org.skriptlang.skript.api.util.LockAccess;
 import org.skriptlang.skript.api.util.SectionUtils;
-import org.skriptlang.skript.parser.LockAccess;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

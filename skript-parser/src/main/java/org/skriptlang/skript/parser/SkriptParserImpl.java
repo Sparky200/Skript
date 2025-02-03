@@ -11,6 +11,7 @@ import org.skriptlang.skript.api.nodes.*;
 import org.skriptlang.skript.api.scope.InputDefinition;
 import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.script.ScriptSource;
+import org.skriptlang.skript.api.util.LockAccess;
 import org.skriptlang.skript.api.util.ResultWithDiagnostics;
 import org.skriptlang.skript.api.util.ScriptDiagnostic;
 import org.skriptlang.skript.parser.pattern.SyntaxPatternElement;
