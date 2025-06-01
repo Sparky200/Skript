@@ -1,0 +1,4 @@
+
+on script load:
+	loop 6 times:
+		broadcast "test"
