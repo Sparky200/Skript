@@ -27,6 +27,7 @@ public final class SyntaxManifest {
 		parser.submitNode(AddEffect.TYPE);
 		parser.submitNode(RemoveEffect.TYPE);
 		parser.submitNode(ListExpression.TYPE);
+		parser.submitNode(LoopEffect.TYPE);
 	}
 
 }

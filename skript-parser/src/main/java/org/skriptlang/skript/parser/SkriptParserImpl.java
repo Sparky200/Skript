@@ -157,7 +157,9 @@ public final class SkriptParserImpl implements SkriptParser {
 
 		Token whitespace;
 		do {
+			while (index < tokens.size() && tokens.get(index).type() == TokenType.WHITESPACE) index++;
 			if (index >= tokens.size()) break;
+
 			Match<StatementNode> next = parseStatement(parseContextImpl, tokens.subList(index, tokens.size()), parseContextImpl.depth() == 0 ? StructureNodeType.class : EffectNodeType.class);
 			if (next == null) {
 				parseContextImpl.info("Fail occurred in section depth " + parseContextImpl.depth(), tokens.get(index).start());
