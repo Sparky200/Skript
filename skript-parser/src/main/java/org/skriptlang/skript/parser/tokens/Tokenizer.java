@@ -53,7 +53,7 @@ public class Tokenizer {
 
 		List<TokenizedSyntax> tokenizedSyntaxes = new LinkedList<>();
 		// initial empty syntax for elements to spin off of
-		tokenizedSyntaxes.add(new TokenizedSyntax(nodeType, patternIndex, Collections.emptyList()));
+		tokenizedSyntaxes.add(new TokenizedSyntax(nodeType, patternIndex, new Token[0]));
 		for (PatternElement patternElement : patternElements) {
 			tokenizedSyntaxes = patternElement.createTokenizedSyntaxes(nodeType, tokenizedSyntaxes);
 		}
@@ -75,14 +75,14 @@ public class Tokenizer {
 			index = findNextInstructingElement(tokens, index + 1);
 			if (index == -1) {
 				if (lastClosing + 1 != tokens.size()) {
-					elements.add(new TokensPatternElement(tokens.subList(lastClosing + 1, tokens.size())));
+					elements.add(new TokensPatternElement(tokens.subList(lastClosing + 1, tokens.size()).toArray(new Token[0])));
 				}
 				break;
 			}
 			Token token = tokens.get(index);
 
 			if (lastClosing + 1 != index && token.asPunctuation() != Punctuation.PIPE) {
-				elements.add(new TokensPatternElement(tokens.subList(lastClosing + 1, index)));
+				elements.add(new TokensPatternElement(tokens.subList(lastClosing + 1, index).toArray(new Token[0])));
 			}
 
 			if (token.type() == TokenType.PUNCTUATION) {

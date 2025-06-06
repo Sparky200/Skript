@@ -9,7 +9,7 @@ import org.skriptlang.skript.parser.TokenizedSyntax;
 import org.skriptlang.skript.parser.tokens.Token;
 import org.skriptlang.skript.parser.tokens.TokenType;
 
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,9 +41,9 @@ public class SyntaxPatternElement extends PatternElement {
 	@Override
 	public List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType<?> nodeType, List<TokenizedSyntax> existingSyntaxes) {
 		return existingSyntaxes.stream().map(existingSyntax -> {
-			var newList = new LinkedList<>(existingSyntax.tokens());
-			newList.add(new Token(TokenType.SYNTAX, this, -1, 0, null));
-			return new TokenizedSyntax(nodeType, existingSyntax.patternIndex(), newList);
+			var newArray = Arrays.copyOf(existingSyntax.tokens(), existingSyntax.tokens().length + 1);
+			newArray[newArray.length - 1] = new Token(TokenType.SYNTAX, this, -1, 0, null);
+			return new TokenizedSyntax(nodeType, existingSyntax.patternIndex(), newArray);
 		}).toList();
 	}
 }

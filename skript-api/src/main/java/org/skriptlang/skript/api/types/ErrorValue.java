@@ -25,4 +25,9 @@ public class ErrorValue extends SkriptValue {
 	public static @NotNull ErrorValue of(Throwable throwable) {
 		return new ErrorValue(throwable.getMessage());
 	}
+
+	@Override
+	public String toString() {
+		return message.toString();
+	}
 }

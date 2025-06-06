@@ -37,7 +37,7 @@ public final class SkriptParserImpl implements SkriptParser {
 	 * Note this is not directly used during parse-time.
 	 * This will be copied into a context object.
 	 */
-	private @Nullable List<TokenizedSyntax> tokenizedSyntaxes = null;
+	private @Nullable TokenizedSyntax[] tokenizedSyntaxes = null;
 
 	// TODO: this can and should be lazily computed just like tokenized syntaxes
 	private final List<SectionScope> scopes = new LinkedList<>();
@@ -218,15 +218,15 @@ public final class SkriptParserImpl implements SkriptParser {
 			return null;
 		}
 
-		List<TokenizedSyntax> candidates = findCandidates(parseContextImpl, singleLineTokens, superType);
+		TokenizedSyntax[] candidates = findCandidates(parseContextImpl, singleLineTokens, superType).toArray(TokenizedSyntax[]::new);
 
-		if (candidates.isEmpty()) {
+		if (candidates.length == 0) {
 			parseContextImpl.error("No statement matched", tokens.getFirst().start());
 			return null;
 		}
 
 		int finalEnd = end;
-		Stream<Match<SyntaxNode>> candidateNodes = candidates.stream()
+		Stream<Match<SyntaxNode>> candidateNodes = Arrays.stream(candidates)
 			// attempt to parse each candidate
 			.map(candidate -> parseCandidate(parseContextImpl, candidate, tokens.subList(0, hasSection(candidate) ? tokens.size() : finalEnd)))
 			// filter to successful parses
@@ -250,13 +250,13 @@ public final class SkriptParserImpl implements SkriptParser {
 		@NotNull List<Token> tokens
 	) {
 
-		List<Token> syntaxTokens = candidate.tokens();
+		Token[] syntaxTokens = candidate.tokens();
 
 		List<SyntaxNode> children = new LinkedList<>();
 
 		int tokenIndex = 0;
-		for (int i = 0; i < syntaxTokens.size(); i++) {
-			Token syntaxToken = syntaxTokens.get(i);
+		for (int i = 0; i < syntaxTokens.length; i++) {
+			Token syntaxToken = syntaxTokens[i];
 			if (syntaxToken.type() != TokenType.SYNTAX) {
 				tokenIndex++;
 				continue;
@@ -266,7 +266,7 @@ public final class SkriptParserImpl implements SkriptParser {
 
 			List<Token> subTokens;
 			if (element.syntaxType().equals("section") || element.syntaxType().equals("entries")) {
-				if (i != syntaxTokens.size() - 1) {
+				if (i != syntaxTokens.length - 1) {
 					context.error("Section or entries syntax must be at the end of a pattern", syntaxToken.start());
 					return null;
 				}
@@ -274,7 +274,7 @@ public final class SkriptParserImpl implements SkriptParser {
 			} else {
 				subTokens = tokens.subList(tokenIndex, tokenIndex + findEnd(
 					tokens.subList(tokenIndex, tokens.size()),
-					syntaxTokens.subList(i + 1, syntaxTokens.size())
+					Arrays.stream(syntaxTokens).toList().subList(i + 1, syntaxTokens.length)
 				));
 				if (
 					!subTokens.isEmpty()
@@ -409,26 +409,26 @@ public final class SkriptParserImpl implements SkriptParser {
 		@NotNull List<Token> tokens,
 		@Nullable String desiredTypeName
 	) {
-		List<TokenizedSyntax> candidates = findCandidates(context, tokens, ExpressionNodeType.class);
-		if (candidates.isEmpty()) {
+		TokenizedSyntax[] candidates = findCandidates(context, tokens, ExpressionNodeType.class).toArray(TokenizedSyntax[]::new);
+		if (candidates.length == 0) {
 			context.error("No possible expression", tokens.getFirst().start());
 			return null;
 		}
 
-		List<Match<SyntaxNode>> candidateNodes = candidates.stream()
+		Match<?>[] candidateNodes = Arrays.stream(candidates)
 			.map(candidate -> parseCandidate(context, candidate, tokens))
 			.filter(Objects::nonNull)
 			.filter(it -> it.length() == tokens.size())
-			.toList();
+			.toArray(Match[]::new);
 
-		if (candidateNodes.size() > 1) {
+		if (candidateNodes.length > 1) {
 			return new Match<>(new MultiMatchExpressionNode(
-				candidateNodes.stream().map(it -> (ExpressionNode<?>) it.node()).toList(),
+				Arrays.stream(candidateNodes).map(it -> (ExpressionNode<?>) it.node()).toList(),
 				desiredTypeName
 			), tokens.size());
 		}
 
-		Match<SyntaxNode> selected = candidateNodes.stream().findFirst().orElse(null);
+		Match<?> selected = candidateNodes[0];
 		if (selected == null) return null;
 		return new Match<>((ExpressionNode<?>) selected.node(), selected.length());
 	}
@@ -459,7 +459,7 @@ public final class SkriptParserImpl implements SkriptParser {
 					}
 					return result.get().stream();
 				})
-				.toList()
+				.toArray(TokenizedSyntax[]::new)
 		);
 
 		// start after whitespace
@@ -513,14 +513,14 @@ public final class SkriptParserImpl implements SkriptParser {
 		@NotNull List<Token> tokens,
 		@NotNull Map<String, EntryDefinition> unused
 	) {
-		List<TokenizedSyntax> candidates = findCandidates(context, tokens, StructureEntryNodeType.class);
+		TokenizedSyntax[] candidates = findCandidates(context, tokens, StructureEntryNodeType.class).toArray(TokenizedSyntax[]::new);
 
-		if (candidates.isEmpty()) {
+		if (candidates.length == 0) {
 			context.error("No entry matched", tokens.getFirst().start());
 			return null;
 		}
 
-		return candidates.stream()
+		return Arrays.stream(candidates)
 			.map(candidate -> parseCandidate(context, candidate, hasSection(candidate) ? tokens : tokens.subList(0, tokens.size() - 1)))
 			.filter(Objects::nonNull)
 			.map(node -> {
@@ -550,11 +550,11 @@ public final class SkriptParserImpl implements SkriptParser {
 				throw new IllegalStateException("Fatal edge case: input tokenization failed");
 			}
 			return result.get().getFirst();
-		}).toList());
+		}).toArray(TokenizedSyntax[]::new));
 	}
 
 	private boolean hasSection(@NotNull TokenizedSyntax syntax) {
-		return syntax.tokens().stream().anyMatch(it -> {
+		return Arrays.stream(syntax.tokens()).anyMatch(it -> {
 			if (it.type() != TokenType.SYNTAX) return false;
 			SyntaxPatternElement element = (SyntaxPatternElement) it.value();
 			return element.syntaxType().equals("section") || element.syntaxType().equals("entries");
@@ -567,27 +567,27 @@ public final class SkriptParserImpl implements SkriptParser {
 	 * @param superType The super type to bound candidates to.
 	 * @return The candidates that can match the tokens.
 	 */
-	private @NotNull List<TokenizedSyntax> findCandidates(
+	private @NotNull Stream<TokenizedSyntax> findCandidates(
 		@NotNull ParseContextImpl context,
 		@NotNull List<Token> tokens,
 		@NotNull Class<?> superType
 	) {
-		return context.availableSyntaxes().stream()
+		return context.availableSyntaxes()
 			.filter(tokenizedSyntax -> superType.isInstance(tokenizedSyntax.nodeType()))
 			.filter(tokenizedSyntax -> tokenizedSyntax.canMatch(tokens))
-			.filter(tokenizedSyntax -> tokenizedSyntax.nodeType().canBeParsed(context, tokenizedSyntax.patternIndex()))
-			.toList();
+			.filter(tokenizedSyntax -> tokenizedSyntax.nodeType().canBeParsed(context, tokenizedSyntax.patternIndex()));
 	}
 
 	private void pushParseableSyntaxes(@NotNull ParseContextImpl context) {
-		List<TokenizedSyntax> alreadyAvailable = context.availableSyntaxes();
+		TokenizedSyntax[] alreadyAvailable = context.availableSyntaxes().toArray(TokenizedSyntax[]::new);
 		context.pushSyntaxFrame(
-			Objects.requireNonNull(tokenizedSyntaxes).stream()
+			Arrays.stream(tokenizedSyntaxes)
+				.filter(Objects::nonNull)
 				.filter(it ->
-					!alreadyAvailable.contains(it)
+					Arrays.stream(alreadyAvailable).noneMatch(it2 -> it == it2)
 						&& it.nodeType().canBeParsed(context, it.patternIndex())
 				)
-				.toList()
+				.toArray(TokenizedSyntax[]::new)
 		);
 	}
 
@@ -620,7 +620,7 @@ public final class SkriptParserImpl implements SkriptParser {
 			}
 		}
 
-		tokenizedSyntaxes = Collections.unmodifiableList(list);
+		tokenizedSyntaxes = list.toArray(new TokenizedSyntax[0]);
 		return ResultWithDiagnostics.success(new Object());
 	}
 

@@ -8,6 +8,7 @@ import org.skriptlang.skript.api.nodes.StructureNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.ErrorValue;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -33,6 +34,7 @@ public final class SectionUtils {
 	public static @NotNull ExecuteResult executeSimple(@NotNull SectionNode section, @NotNull ExecuteContext runContext) {
 		for (StatementNode node : section.children()) {
 			if (node instanceof EffectNode effectNode) {
+				runContext.stepFlags();
 				ExecuteResult result = effectNode.execute(runContext);
 				if (result instanceof ExecuteResult.Failure) {
 					return result;
@@ -52,7 +54,7 @@ public final class SectionUtils {
 	 * @return The result
 	 */
 	public static @NotNull ExecuteResult loadStructuresIn(@NotNull SectionNode section, @NotNull ExecuteContext loadContext) {
-		List<StructureNode> structures = section.children().stream()
+		List<StructureNode> structures = Arrays.stream(section.children())
 			.map(node -> node instanceof StructureNode ? (StructureNode) node : null)
 			.toList();
 
@@ -85,7 +87,7 @@ public final class SectionUtils {
 	 * @param loadContext The context to unload in
 	 */
 	public static void unloadStructuresIn(SectionNode section, ExecuteContext loadContext) {
-		List<StructureNode> structures = section.children().stream()
+		List<StructureNode> structures = Arrays.stream(section.children())
 			.map(node -> node instanceof StructureNode ? (StructureNode) node : null)
 			.toList();
 

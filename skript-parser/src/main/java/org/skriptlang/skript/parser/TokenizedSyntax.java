@@ -15,15 +15,12 @@ import java.util.*;
  * @param tokens   The tokens that make up this syntax.
  *                 This will be matched against tokenized scripts to determine if this syntax is present.
  */
-public record TokenizedSyntax(@NotNull SyntaxNodeType<?> nodeType, int patternIndex, @NotNull List<Token> tokens) {
+public record TokenizedSyntax(@NotNull SyntaxNodeType<?> nodeType, int patternIndex, @NotNull Token[] tokens) {
 
-	public TokenizedSyntax(@NotNull SyntaxNodeType<?> nodeType, int patternIndex, @NotNull List<Token> tokens) {
+	public TokenizedSyntax {
 		Preconditions.checkNotNull(nodeType);
 		Preconditions.checkNotNull(tokens);
 
-		this.nodeType = nodeType;
-		this.patternIndex = patternIndex;
-		this.tokens = Collections.unmodifiableList(tokens);
 	}
 
 	/**
@@ -31,6 +28,6 @@ public record TokenizedSyntax(@NotNull SyntaxNodeType<?> nodeType, int patternIn
 	 * @param scriptTokens The script tokens to match against. Not the entire script, just the tokens relevant to this syntax.
 	 */
 	public boolean canMatch(@NotNull List<Token> scriptTokens) {
-		return TokenComparer.canMatch(tokens, scriptTokens);
+		return TokenComparer.canMatch(Arrays.stream(tokens).toList(), scriptTokens);
 	}
 }

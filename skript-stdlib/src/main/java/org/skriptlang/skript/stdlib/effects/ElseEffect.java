@@ -1,0 +1,46 @@
+package org.skriptlang.skript.stdlib.effects;
+
+import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.api.nodes.EffectNode;
+import org.skriptlang.skript.api.nodes.EffectNodeType;
+import org.skriptlang.skript.api.nodes.SectionNode;
+import org.skriptlang.skript.api.nodes.SyntaxNode;
+import org.skriptlang.skript.api.runtime.ExecuteContext;
+import org.skriptlang.skript.api.types.ErrorValue;
+import org.skriptlang.skript.api.util.ExecuteResult;
+import org.skriptlang.skript.api.util.SectionUtils;
+
+import java.util.List;
+
+public class ElseEffect implements EffectNode {
+	public static final EffectNodeType<ElseEffect> TYPE = new EffectNodeType<>() {
+		@Override
+		public List<String> getSyntaxes() {
+			return List.of("else:<section>");
+		}
+
+		@Override
+		public @NotNull ElseEffect create(List<SyntaxNode> children, int matchedPattern) {
+			return new ElseEffect((SectionNode) children.getFirst());
+		}
+	};
+
+	private final SectionNode trigger;
+
+	public ElseEffect(SectionNode trigger) {
+		this.trigger = trigger;
+	}
+
+	@Override
+	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {
+		if (!context.ifContext())
+			return ExecuteResult.failure(new ErrorValue("else can only appear preceded by an if or else if statement"));
+
+		// Do not evaluate anything if the previous if statement was valid
+		if (context.ifState()) return ExecuteResult.success();
+
+		ExecuteContext runContext = context.fork();
+
+		return SectionUtils.executeSimple(trigger, runContext);
+	}
+}

@@ -15,8 +15,15 @@ import java.util.List;
  * This is one of the few nodes that does not have a type, and thus will not be in the parse context.
  */
 @ApiStatus.NonExtendable
-public record SectionNode(List<StatementNode> children) implements SyntaxNode {
+public final class SectionNode implements SyntaxNode {
+	private final StatementNode[] children;
+
 	public SectionNode(List<StatementNode> children) {
-		this.children = ImmutableList.copyOf(children);
+		this.children = new StatementNode[children.size()];
+		children.toArray(this.children);
+	}
+
+	public StatementNode[] children() {
+		return children;
 	}
 }

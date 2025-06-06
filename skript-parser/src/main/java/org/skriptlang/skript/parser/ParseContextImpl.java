@@ -9,9 +9,10 @@ import org.skriptlang.skript.api.util.ScriptDiagnostic;
 import org.skriptlang.skript.parser.tokens.Token;
 import org.skriptlang.skript.parser.tokens.TokenType;
 
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A stack plus context of a script being parsed.
@@ -146,7 +147,7 @@ public class ParseContextImpl implements ParseContext {
 		return contextStack;
 	}
 
-	public void pushSyntaxFrame(List<TokenizedSyntax> syntaxes) {
+	public void pushSyntaxFrame(TokenizedSyntax[] syntaxes) {
 		syntaxFrames.push(new SyntaxFrame(syntaxes));
 	}
 
@@ -154,12 +155,12 @@ public class ParseContextImpl implements ParseContext {
 		syntaxFrames.pop();
 	}
 
-	public List<TokenizedSyntax> availableSyntaxes() {
-		return syntaxFrames.stream().flatMap(frame -> frame.syntaxes().stream()).toList();
+	public Stream<TokenizedSyntax> availableSyntaxes() {
+		return syntaxFrames.stream().flatMap(frame -> Arrays.stream(frame.syntaxes()));
 	}
 
 	/**
 	 * Represents a frame of parseable syntax.
 	 */
-	private record SyntaxFrame(List<TokenizedSyntax> syntaxes) {}
+	private record SyntaxFrame(TokenizedSyntax[] syntaxes) {}
 }
