@@ -2,6 +2,7 @@ package org.skriptlang.skript.api.runtime;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.api.nodes.SectionNode;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.script.Script;
 import org.skriptlang.skript.api.types.NoneValue;
@@ -18,6 +19,38 @@ import java.util.function.Supplier;
  * Syntax nodes may provisionally create child contexts in order to execute or resolve their children.
  */
 public interface ExecuteContext {
+
+	/**
+	 * Whether the if-context flag is currently active.
+	 * This is true when the previous statement was an if-statement.
+	 */
+	boolean ifContext();
+
+	/**
+	 * The condition value of the last if-statement.
+	 * If true, the if-statement succeeded and ran its section.
+	 */
+	boolean ifState();
+
+	/**
+	 * Sets the if-context with the provided expiration.
+	 * @param expiration The expiration, statement count in the current section.
+	 */
+	void ifContext(int expiration);
+
+	/**
+	 * Sets the if-state to the given value.
+	 */
+	void ifState(boolean state);
+
+	/**
+	 * Steps through the flag states, possibly removing them.
+	 * This is available for custom logic regarding how flags are stepped through,
+	 * but it should be noted that this logic is executed by utilities provided by default.
+	 * @see org.skriptlang.skript.api.util.SectionUtils#executeSimple(SectionNode, ExecuteContext)
+	 * 		SectionUtils#executeSimple(SectionNode, ExecuteContext)
+	 */
+	void stepFlags();
 
 	/**
 	 * Forks the context into a descendant (child) context.

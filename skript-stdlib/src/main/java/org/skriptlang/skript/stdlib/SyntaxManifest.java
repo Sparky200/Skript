@@ -17,6 +17,9 @@ public final class SyntaxManifest {
 		parser.submitNode(BroadcastEffect.TYPE);
 		parser.submitNode(StringLiteralExpression.TYPE);
 		parser.submitNode(NumberLiteralExpression.TYPE);
+		parser.submitNode(BooleanLiteralExpression.TYPE);
+		parser.submitNode(NotExpression.TYPE);
+		parser.submitNode(NoneLiteralExpression.TYPE);
 		parser.submitNode(PropertyExpression.TYPE);
 		parser.submitScope(OnScriptLoadEvent.SCOPE);
 		parser.submitNode(OnScriptLoadEvent.TYPE);
@@ -28,6 +31,9 @@ public final class SyntaxManifest {
 		parser.submitNode(RemoveEffect.TYPE);
 		parser.submitNode(ListExpression.TYPE);
 		parser.submitNode(LoopEffect.TYPE);
+		parser.submitNode(IfEffect.TYPE);
+		parser.submitNode(ElseIfEffect.TYPE);
+		parser.submitNode(ElseEffect.TYPE);
 	}
 
 }

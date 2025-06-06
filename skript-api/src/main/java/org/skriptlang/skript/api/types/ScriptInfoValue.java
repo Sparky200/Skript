@@ -35,4 +35,9 @@ public final class ScriptInfoValue extends SkriptValue {
 	public static ScriptInfoValue ofSource(@NotNull Script source) {
 		return new ScriptInfoValue(new StringValue(source.source().name()), new NumberValue(source.source().content().length()));
 	}
+
+	@Override
+	public String toString() {
+		return "<script '" + name + "'>";
+	}
 }

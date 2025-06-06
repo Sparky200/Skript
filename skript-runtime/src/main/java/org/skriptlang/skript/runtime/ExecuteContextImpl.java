@@ -19,8 +19,12 @@ public class ExecuteContextImpl implements ExecuteContext {
 	private final @NotNull SkriptRuntime runtime;
 	private final @Nullable ExecuteContext parent;
 
-	private final @NotNull Map<String, Variable> variables = new LinkedHashMap<>();
-	private final @NotNull Map<String, Variable> literalVariables = new LinkedHashMap<>();
+	private Map<String, Variable> variables = null;
+	private Map<String, Variable> literalVariables = null;
+
+	private boolean ifContext;
+	private boolean ifState;
+	private int ifContextExpiration;
 
 	protected ExecuteContextImpl(@NotNull SkriptRuntime runtime, @Nullable ExecuteContext parent) {
 		this.runtime = runtime;
@@ -53,7 +57,7 @@ public class ExecuteContextImpl implements ExecuteContext {
 
 	@Override
 	public boolean hasVariableInPlace(String name) {
-		return variables.containsKey(name);
+		return variables != null && variables.containsKey(name);
 	}
 
 	@Override
@@ -63,7 +67,7 @@ public class ExecuteContextImpl implements ExecuteContext {
 
 	@Override
 	public @Nullable Variable getVariableInPlace(String name) {
-		return variables.get(name);
+		return variables != null ? variables.get(name) : null;
 	}
 
 	@Override
@@ -79,6 +83,8 @@ public class ExecuteContextImpl implements ExecuteContext {
 
 	@Override
 	public @NotNull Variable setVariableInPlace(String name, @NotNull SkriptValue initialValue) {
+		// lazy loading to save memory on contexts with no variables
+		if (variables == null) variables = new LinkedHashMap<>();
 		Variable variable = new VariableImpl.OfValue(runtime, initialValue);
 		variables.put(name, variable);
 		return variable;
@@ -94,7 +100,7 @@ public class ExecuteContextImpl implements ExecuteContext {
 
 	@Override
 	public void unsetVariableInPlace(String name) {
-		variables.remove(name);
+		if (variables != null) variables.remove(name);
 	}
 
 	@Override
@@ -108,7 +114,7 @@ public class ExecuteContextImpl implements ExecuteContext {
 
 	@Override
 	public boolean hasLiteralVariableInPlace(String name) {
-		return literalVariables.containsKey(name);
+		return literalVariables != null && literalVariables.containsKey(name);
 	}
 
 	@Override
@@ -118,7 +124,7 @@ public class ExecuteContextImpl implements ExecuteContext {
 
 	@Override
 	public @Nullable Variable getLiteralVariableInPlace(String name) {
-		return literalVariables.get(name);
+		return literalVariables != null ? literalVariables.get(name) : null;
 	}
 
 	@Override
@@ -134,6 +140,7 @@ public class ExecuteContextImpl implements ExecuteContext {
 
 	@Override
 	public @NotNull Variable setLiteralVariableInPlace(String name, @NotNull SkriptValue initialValue) {
+		if (literalVariables == null) literalVariables = new LinkedHashMap<>();
 		Variable variable = new VariableImpl.OfValue(runtime, initialValue);
 		literalVariables.put(name, variable);
 		return variable;
@@ -149,7 +156,7 @@ public class ExecuteContextImpl implements ExecuteContext {
 
 	@Override
 	public void unsetLiteralVariableInPlace(String name) {
-		literalVariables.remove(name);
+		if (literalVariables != null) literalVariables.remove(name);
 	}
 
 	@Override
@@ -201,4 +208,28 @@ public class ExecuteContextImpl implements ExecuteContext {
 		if (parent == null) return Map.of();
 		return parent.getAllScriptData();
 	}
+
+	public boolean ifContext() {
+		return ifContext;
+	}
+
+	public boolean ifState() {
+		return ifState;
+	}
+
+	public void ifContext(int expiration) {
+		ifContextExpiration = expiration;
+		ifContext = true;
+	}
+
+	public void ifState(boolean state) {
+		ifState = state;
+	}
+
+	@Override
+	public void stepFlags() {
+		if (ifContextExpiration > 0 && --ifContextExpiration == 0) ifContext = false;
+	}
+
+
 }

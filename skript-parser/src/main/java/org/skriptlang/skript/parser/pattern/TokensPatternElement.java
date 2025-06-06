@@ -6,6 +6,7 @@ import org.skriptlang.skript.api.nodes.SyntaxNodeType;
 import org.skriptlang.skript.parser.TokenizedSyntax;
 import org.skriptlang.skript.parser.tokens.Token;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,23 +17,22 @@ import java.util.List;
  * that all other elements eventually contain.
  */
 public class TokensPatternElement extends PatternElement {
-	private final List<Token> tokens;
+	private final Token[] tokens;
 
-	public TokensPatternElement(@NotNull List<Token> tokens) {
-		this.tokens = ImmutableList.copyOf(tokens);
+	public TokensPatternElement(@NotNull Token[] tokens) {
+		this.tokens = tokens;
 	}
 
-	public List<Token> getTokens() {
+	public Token[] getTokens() {
 		return tokens;
 	}
 
 	@Override
 	public List<TokenizedSyntax> createTokenizedSyntaxes(SyntaxNodeType<?> nodeType, List<TokenizedSyntax> existingSyntaxes) {
 		return existingSyntaxes.stream().map(existingSyntax -> {
-			var newList = new LinkedList<Token>();
-			newList.addAll(existingSyntax.tokens());
-			newList.addAll(tokens);
-			return new TokenizedSyntax(nodeType, existingSyntax.patternIndex(), newList);
+			var newArray = Arrays.copyOf(existingSyntax.tokens(), existingSyntax.tokens().length + tokens.length);
+			System.arraycopy(tokens, 0, newArray, existingSyntax.tokens().length, tokens.length);
+			return new TokenizedSyntax(nodeType, existingSyntax.patternIndex(), newArray);
 		}).toList();
 	}
 }
