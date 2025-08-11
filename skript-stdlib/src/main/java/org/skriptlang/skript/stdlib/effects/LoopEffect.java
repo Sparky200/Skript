@@ -23,14 +23,14 @@ public class LoopEffect implements EffectNode {
 
 		@Override
 		public @NotNull LoopEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new LoopEffect((ExpressionNode<?>) children.get(0), (SectionNode) children.get(1));
+			return new LoopEffect((ExpressionNode) children.get(0), (SectionNode) children.get(1));
 		}
 	};
 
-	private final ExpressionNode<?> timesSelector;
+	private final ExpressionNode timesSelector;
 	private final SectionNode trigger;
 
-	public LoopEffect(ExpressionNode<?> timesSelector, SectionNode trigger) {
+	public LoopEffect(ExpressionNode timesSelector, SectionNode trigger) {
 		this.timesSelector = timesSelector;
 		this.trigger = trigger;
 	}

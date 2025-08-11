@@ -22,15 +22,15 @@ public class IncrementEffect implements EffectNode {
 
 		@Override
 		public @NotNull IncrementEffect create(List<SyntaxNode> children, int matchedPattern) {
-			ExpressionNode<?> amountSelector = children.size() == 2 ? (ExpressionNode<?>) children.get(1) : null;
-			return new IncrementEffect((ExpressionNode<?>) children.getFirst(), amountSelector);
+			ExpressionNode amountSelector = children.size() == 2 ? (ExpressionNode) children.get(1) : null;
+			return new IncrementEffect((ExpressionNode) children.getFirst(), amountSelector);
 		}
 	};
 
-	private final @NotNull ExpressionNode<?> receiverSelector;
-	private final @Nullable ExpressionNode<?> amountSelector;
+	private final @NotNull ExpressionNode receiverSelector;
+	private final @Nullable ExpressionNode amountSelector;
 
-	public IncrementEffect(@NotNull ExpressionNode<?> receiverSelector, @Nullable ExpressionNode<?> amountSelector) {
+	public IncrementEffect(@NotNull ExpressionNode receiverSelector, @Nullable ExpressionNode amountSelector) {
 		this.receiverSelector = receiverSelector;
 		this.amountSelector = amountSelector;
 	}

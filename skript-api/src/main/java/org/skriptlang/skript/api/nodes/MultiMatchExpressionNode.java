@@ -18,16 +18,16 @@ import java.util.List;
  * Note that this only occurs with syntaxes that are ambiguous until a type is known.
  * In addition, if there's still type ambiguity, the "first" result matching the desired type will be returned.
  */
-public class MultiMatchExpressionNode implements ExpressionNode<SkriptValueOrVariable> {
+public class MultiMatchExpressionNode implements ExpressionNode {
 
-	private final List<? extends ExpressionNode<?>> possibleMatches;
+	private final List<? extends ExpressionNode> possibleMatches;
 
 	/**
 	 * The type name that is desired by the parent.
 	 */
 	private final @NotNull String desiredTypeName;
 
-	public MultiMatchExpressionNode(List<? extends ExpressionNode<?>> possibleMatches, @Nullable String desiredTypeName) {
+	public MultiMatchExpressionNode(List<? extends ExpressionNode> possibleMatches, @Nullable String desiredTypeName) {
 		this.possibleMatches = possibleMatches;
 		this.desiredTypeName = desiredTypeName != null ? desiredTypeName : "any";
 	}
@@ -56,7 +56,7 @@ public class MultiMatchExpressionNode implements ExpressionNode<SkriptValueOrVar
 		List<RuntimeSkriptType<?>> allowedTypes = createAllowedTypes(context, desiredType);
 
 
-		for (ExpressionNode<?> possibleMatch : possibleMatches) {
+		for (ExpressionNode possibleMatch : possibleMatches) {
 			SkriptValueOrVariable resolved = possibleMatch.resolve(context);
 
 			if (!allowedTypes.contains(resolved.toValue().getType(context.runtime()))) {

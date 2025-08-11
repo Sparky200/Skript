@@ -22,6 +22,6 @@ public class ParameterMetaValue extends SkriptValue {
 		return parameters;
 	}
 
-	public record Parameter(String name, String type, ExpressionNode<?> defaultSelector) {}
+	public record Parameter(String name, String type, ExpressionNode defaultSelector) {}
 
 }

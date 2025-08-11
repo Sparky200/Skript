@@ -24,17 +24,17 @@ public class AddEffect implements EffectNode {
 
 		@Override
 		public @NotNull AddEffect create(@NotNull List<SyntaxNode> children, int matchedPattern) {
-			ExpressionNode<?> receiver = matchedPattern == 0 ? (ExpressionNode<?>) children.get(1) : (ExpressionNode<?>) children.get(0);
-			ExpressionNode<?> value = matchedPattern == 0 ? (ExpressionNode<?>) children.get(0) : (ExpressionNode<?>) children.get(1);
+			ExpressionNode receiver = matchedPattern == 0 ? (ExpressionNode) children.get(1) : (ExpressionNode) children.get(0);
+			ExpressionNode value = matchedPattern == 0 ? (ExpressionNode) children.get(0) : (ExpressionNode) children.get(1);
 
 			return new AddEffect(value, receiver);
 		}
 	};
 
-	private final ExpressionNode<?> valueSelector;
-	private final ExpressionNode<?> receiverSelector;
+	private final ExpressionNode valueSelector;
+	private final ExpressionNode receiverSelector;
 
-	public AddEffect(ExpressionNode<?> valueSelector, ExpressionNode<?> receiverSelector) {
+	public AddEffect(ExpressionNode valueSelector, ExpressionNode receiverSelector) {
 		this.valueSelector = valueSelector;
 		this.receiverSelector = receiverSelector;
 	}

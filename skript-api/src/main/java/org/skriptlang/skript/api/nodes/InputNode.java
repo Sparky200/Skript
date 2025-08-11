@@ -13,13 +13,13 @@ import java.util.Objects;
  * based on a syntax's inputs and outputs in pattern elements.
  * @param inputName The name of the input.
  */
-public record InputNode(@NotNull String inputName) implements ExpressionNode<Variable> {
+public record InputNode(@NotNull String inputName) implements ExpressionNode {
 	/**
 	 * The type for input node, which is dynamically created by the parser.
 	 * @param inputName The name of the input.
 	 * @param typeName The name of the type that this input node resolves to.
 	 */
-	public record Type(@NotNull String inputName, @NotNull String typeName) implements ExpressionNodeType<InputNode, Variable> {
+	public record Type(@NotNull String inputName, @NotNull String typeName) implements ExpressionNodeType<InputNode> {
 		public Type {
 			Preconditions.checkNotNull(inputName, "inputName must not be null");
 			Preconditions.checkNotNull(typeName, "typeName must not be null");

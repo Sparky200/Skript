@@ -21,14 +21,14 @@ public class ElseIfEffect implements EffectNode {
 
 		@Override
 		public @NotNull ElseIfEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new ElseIfEffect((ExpressionNode<?>) children.getFirst(), (SectionNode) children.getLast());
+			return new ElseIfEffect((ExpressionNode) children.getFirst(), (SectionNode) children.getLast());
 		}
 	};
 
-	private final ExpressionNode<?> condition;
+	private final ExpressionNode condition;
 	private final SectionNode trigger;
 
-	public ElseIfEffect(ExpressionNode<?> condition, SectionNode trigger) {
+	public ElseIfEffect(ExpressionNode condition, SectionNode trigger) {
 		this.condition = condition;
 		this.trigger = trigger;
 	}

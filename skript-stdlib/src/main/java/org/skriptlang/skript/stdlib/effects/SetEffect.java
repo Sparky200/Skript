@@ -21,14 +21,14 @@ public class SetEffect implements EffectNode {
 
 		@Override
 		public @NotNull SetEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new SetEffect((ExpressionNode<?>) children.getFirst(), (ExpressionNode<?>) children.get(1));
+			return new SetEffect((ExpressionNode) children.getFirst(), (ExpressionNode) children.get(1));
 		}
 	};
 
-	private final ExpressionNode<?> receiverSelector;
-	private final ExpressionNode<?> valueSelector;
+	private final ExpressionNode receiverSelector;
+	private final ExpressionNode valueSelector;
 
-	public SetEffect(ExpressionNode<?> receiverSelector, ExpressionNode<?> valueSelector) {
+	public SetEffect(ExpressionNode receiverSelector, ExpressionNode valueSelector) {
 		this.receiverSelector = receiverSelector;
 		this.valueSelector = valueSelector;
 	}

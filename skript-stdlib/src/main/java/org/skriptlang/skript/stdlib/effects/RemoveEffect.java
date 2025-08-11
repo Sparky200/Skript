@@ -22,16 +22,16 @@ public class RemoveEffect implements EffectNode {
 		@Override
 		public @NotNull RemoveEffect create(@NotNull List<SyntaxNode> children, int matchedPattern) {
 			return new RemoveEffect(
-				(ExpressionNode<?>) children.get(0),
-				(ExpressionNode<?>) children.get(1)
+				(ExpressionNode) children.get(0),
+				(ExpressionNode) children.get(1)
 			);
 		}
 	};
 
-	private final ExpressionNode<?> valueSelector;
-	private final ExpressionNode<?> receiverSelector;
+	private final ExpressionNode valueSelector;
+	private final ExpressionNode receiverSelector;
 
-	public RemoveEffect(ExpressionNode<?> valueSelector, ExpressionNode<?> receiverSelector) {
+	public RemoveEffect(ExpressionNode valueSelector, ExpressionNode receiverSelector) {
 		this.valueSelector = valueSelector;
 		this.receiverSelector = receiverSelector;
 	}

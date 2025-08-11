@@ -20,14 +20,14 @@ public class IfEffect implements EffectNode {
 
 		@Override
 		public @NotNull IfEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new IfEffect((ExpressionNode<?>) children.getFirst(), (SectionNode) children.getLast());
+			return new IfEffect((ExpressionNode) children.getFirst(), (SectionNode) children.getLast());
 		}
 	};
 
-	private final ExpressionNode<?> condition;
+	private final ExpressionNode condition;
 	private final SectionNode trigger;
 
-	public IfEffect(ExpressionNode<?> condition, SectionNode trigger) {
+	public IfEffect(ExpressionNode condition, SectionNode trigger) {
 		this.condition = condition;
 		this.trigger = trigger;
 	}

@@ -28,7 +28,7 @@ public class FunctionStructure implements StructureNode {
 		public @NotNull FunctionStructure create(List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
 			String name = ((TokenNode) children.getFirst()).tokenContents();
 
-			ExpressionNode<?> paramsSelector = null;
+			ExpressionNode paramsSelector = null;
 			String returns = SkriptValue.TYPE.typeName();
 			SectionNode body = null;
 
@@ -36,7 +36,7 @@ public class FunctionStructure implements StructureNode {
 				switch (child) {
 					case SectionNode sec -> body = sec;
 					case TokenNode(String tokenContents) -> returns = tokenContents;
-					case ExpressionNode<?> expr -> paramsSelector = expr;
+					case ExpressionNode expr -> paramsSelector = expr;
 					case null, default ->
 						throw new IllegalArgumentException("Invalid child: '" + child + "' for function structure");
 				}
@@ -54,9 +54,9 @@ public class FunctionStructure implements StructureNode {
 	private final String name;
 	private final SectionNode body;
 	private final @NotNull String returnTypeName;
-	private final @Nullable ExpressionNode<?> paramsSelector;
+	private final @Nullable ExpressionNode paramsSelector;
 
-	public FunctionStructure(String name, SectionNode body, @NotNull String returnTypeName, @Nullable ExpressionNode<?> paramsSelector) {
+	public FunctionStructure(String name, SectionNode body, @NotNull String returnTypeName, @Nullable ExpressionNode paramsSelector) {
 		this.name = name;
 		this.body = body;
 		this.returnTypeName = returnTypeName;
