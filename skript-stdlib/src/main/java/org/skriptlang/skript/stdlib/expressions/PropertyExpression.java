@@ -10,29 +10,16 @@ import org.skriptlang.skript.api.types.*;
 
 import java.util.List;
 
-public final class PropertyExpression implements ExpressionNode {
-	public static final ExpressionNodeType<PropertyExpression> TYPE = new ExpressionNodeType<>() {
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.expression;
 
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of(
-				"<token::identifier> of <expr>"
-			);
-		}
+public record PropertyExpression(String propertyName, ExpressionNode receiverSelector) implements ExpressionNode {
 
-		@Override
-		public @NotNull PropertyExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new PropertyExpression(((TokenNode) children.getFirst()).tokenContents(), (ExpressionNode) children.get(1));
-		}
-	};
-
-	private final String propertyName;
-	private final ExpressionNode receiverSelector;
-
-	public PropertyExpression(String propertyName, ExpressionNode receiverSelector) {
-		this.propertyName = propertyName;
-		this.receiverSelector = receiverSelector;
-	}
+	public static final ExpressionNodeType<PropertyExpression> TYPE = expression(PropertyExpression.class)
+		.syntaxes("<token::identifier> of <expr>")
+		.create((children, matchedPattern) ->
+			new PropertyExpression(((TokenNode) children.getFirst()).tokenContents(), (ExpressionNode) children.get(1))
+		)
+		.build();
 
 	@Override
 	public @NotNull Variable.OfProperty<?, ?> resolve(@NotNull ExecuteContext context) {

@@ -16,16 +16,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FunctionStructure implements StructureNode {
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.structure;
 
-	public static final StructureNodeType<FunctionStructure> TYPE = new StructureNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("[local] function <token::identifier>([<expr:: -> parametermeta>]) [returns <token::identifier>] : <section>");
-		}
+public record FunctionStructure(
+	String name,
+	SectionNode body,
+	@NotNull String returnTypeName,
+	@Nullable ExpressionNode paramsSelector
+) implements StructureNode {
 
-		@Override
-		public @NotNull FunctionStructure create(List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
+	public static final StructureNodeType<FunctionStructure> TYPE = structure(FunctionStructure.class)
+		.syntaxes("[local] function <token::identifier>([<expr:: -> parametermeta>]) [returns <token::identifier>] : <section>")
+		.create((children, matchedPattern, entries) -> {
 			String name = ((TokenNode) children.getFirst()).tokenContents();
 
 			ExpressionNode paramsSelector = null;
@@ -48,20 +50,8 @@ public class FunctionStructure implements StructureNode {
 				returns,
 				paramsSelector
 			);
-		}
-	};
-
-	private final String name;
-	private final SectionNode body;
-	private final @NotNull String returnTypeName;
-	private final @Nullable ExpressionNode paramsSelector;
-
-	public FunctionStructure(String name, SectionNode body, @NotNull String returnTypeName, @Nullable ExpressionNode paramsSelector) {
-		this.name = name;
-		this.body = body;
-		this.returnTypeName = returnTypeName;
-		this.paramsSelector = paramsSelector;
-	}
+		})
+		.build();
 
 	@Override
 	public Priority priority() {
@@ -72,7 +62,8 @@ public class FunctionStructure implements StructureNode {
 	public @NotNull ExecuteResult load(@NotNull ExecuteContext context) {
 		ExecuteContext functionBaseContext = context.fork();
 		ParameterMetaValue params = paramsSelector != null ? paramsSelector.resolveAs(ParameterMetaValue.class, context) : null;
-		if (paramsSelector != null && params == null) return ExecuteResult.failure(new ErrorValue("Parameters could not be resolved"));
+		if (paramsSelector != null && params == null)
+			return ExecuteResult.failure(new ErrorValue("Parameters could not be resolved"));
 
 		Map<ParameterMetaValue.Parameter, SkriptValue> defaults = new LinkedHashMap<>();
 		if (params != null)

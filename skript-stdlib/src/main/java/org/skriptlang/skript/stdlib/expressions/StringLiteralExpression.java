@@ -4,36 +4,18 @@ import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.ExpressionNode;
 import org.skriptlang.skript.api.nodes.ExpressionNodeType;
 import org.skriptlang.skript.api.nodes.StringNode;
-import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.StringValue;
 
-import java.util.List;
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.expression;
 
-public class StringLiteralExpression implements ExpressionNode {
-	public static final ExpressionNodeType<StringLiteralExpression> TYPE = new ExpressionNodeType<>() {
+public record StringLiteralExpression(ExpressionNode stringTokenSelector) implements ExpressionNode {
 
-		@Override
-		public String[] possibleReturnTypes() {
-			return new String[] { StringValue.TYPE.typeName() };
-		}
-
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("<token::string>");
-		}
-
-		@Override
-		public @NotNull StringLiteralExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new StringLiteralExpression((StringNode) children.getFirst());
-		}
-	};
-
-	private final ExpressionNode stringTokenSelector;
-
-	public StringLiteralExpression(ExpressionNode stringTokenSelector) {
-		this.stringTokenSelector = stringTokenSelector;
-	}
+	public static final ExpressionNodeType<StringLiteralExpression> TYPE = expression(StringLiteralExpression.class)
+		.syntaxes("<token::string>")
+		.possibleReturnTypes(StringValue.TYPE)
+		.create((children, matchedPattern) -> new StringLiteralExpression((StringNode) children.getFirst()))
+		.build();
 
 	@Override
 	public @NotNull StringValue resolve(@NotNull ExecuteContext context) {

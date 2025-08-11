@@ -9,23 +9,15 @@ import org.skriptlang.skript.api.types.NoneValue;
 
 import java.util.List;
 
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.expression;
+
 public class NoneLiteralExpression implements ExpressionNode {
-	public static final ExpressionNodeType<NoneLiteralExpression> TYPE = new ExpressionNodeType<>() {
-		@Override
-		public String[] possibleReturnTypes() {
-			return new String[] { NoneValue.TYPE_NAME };
-		}
 
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("none");
-		}
-
-		@Override
-		public @NotNull NoneLiteralExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new NoneLiteralExpression();
-		}
-	};
+	public static final ExpressionNodeType<NoneLiteralExpression> TYPE = expression(NoneLiteralExpression.class)
+		.syntaxes("none")
+		.possibleReturnTypes(NoneValue.TYPE)
+		.create((children, matchedPattern) -> new NoneLiteralExpression())
+		.build();
 
 	@Override
 	@NotNull

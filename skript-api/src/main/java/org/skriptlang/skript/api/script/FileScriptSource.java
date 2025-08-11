@@ -17,7 +17,7 @@ public class FileScriptSource implements ScriptSource {
 
 	public FileScriptSource(@NotNull Path path) {
 		Preconditions.checkNotNull(path, "path cannot be null");
-		Preconditions.checkArgument(Files.isRegularFile(path), "path must be a regular file");
+		Preconditions.checkArgument(Files.isRegularFile(path), "path must point to a file (got '%s')", path.getFileName());
 		Preconditions.checkArgument(Files.isReadable(path), "path must be readable (check permissions)");
 		this.path = path;
 	}

@@ -17,29 +17,29 @@ import java.util.List;
 import java.util.Map;
 
 import static org.skriptlang.skript.api.entries.EntryStructureDefinition.entryStructure;
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.structure;
 
-public final class CommandStructure implements StructureNode {
+public record CommandStructure(
+	@NotNull String name,
+	SectionNode trigger,
+	@NotNull StringNode description,
+	@Nullable StringNode prefix
+) implements StructureNode {
+
 	public static final SectionScope SCOPE = new SectionScope("command", List.of(
 		new InputDefinition("command", "command_data")
 	));
 
-	public static final StructureNodeType<CommandStructure> TYPE = new StructureNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("command /<token::identifier>:<entries>");
-		}
-
-		public @NotNull EntryStructureDefinition structure() {
-			return entryStructure()
-				// these strings could be tokenized the same way as syntaxes
-				.entry("trigger", "trigger:<section::command>")
-				.entry("description", "description:<token::string>", true)
-				.entry("prefix", "prefix:<token::string>", true)
-				.build();
-		}
-
-		@Override
-		protected @NotNull CommandStructure create(@NotNull List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
+	public static final StructureNodeType<CommandStructure> TYPE = structure(CommandStructure.class)
+		.syntaxes("command /<token::identifier>:<entries>")
+		.structure(entryStructure()
+			// these strings could be tokenized the same way as syntaxes
+			.entry("trigger", "trigger:<section::command>")
+			.entry("description", "description:<token::string>", true)
+			.entry("prefix", "prefix:<token::string>", true)
+			.build()
+		)
+		.create((children, matchedPattern, entries) -> {
 			Preconditions.checkNotNull(entries, "Commands contractually expect entries");
 
 			String name = ((TokenNode) children.getFirst()).tokenContents();
@@ -62,20 +62,8 @@ public final class CommandStructure implements StructureNode {
 				description,
 				prefix
 			);
-		}
-	};
-
-	private final @NotNull String name;
-	private final SectionNode trigger;
-	private final @NotNull StringNode description;
-	private final @Nullable StringNode prefix;
-
-	public CommandStructure(@NotNull String name, SectionNode trigger, @NotNull StringNode description, @Nullable StringNode prefix) {
-		this.name = name;
-		this.trigger = trigger;
-		this.description = description;
-		this.prefix = prefix;
-	}
+		})
+		.build();
 
 	@Override
 	public @NotNull ExecuteResult load(@NotNull ExecuteContext context) {

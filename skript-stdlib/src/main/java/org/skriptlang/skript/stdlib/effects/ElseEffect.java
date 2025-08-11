@@ -12,24 +12,13 @@ import org.skriptlang.skript.api.util.SectionUtils;
 
 import java.util.List;
 
-public class ElseEffect implements EffectNode {
-	public static final EffectNodeType<ElseEffect> TYPE = new EffectNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("else:<section>");
-		}
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 
-		@Override
-		public @NotNull ElseEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new ElseEffect((SectionNode) children.getFirst());
-		}
-	};
-
-	private final SectionNode trigger;
-
-	public ElseEffect(SectionNode trigger) {
-		this.trigger = trigger;
-	}
+public record ElseEffect(SectionNode trigger) implements EffectNode {
+	public static final EffectNodeType<ElseEffect> TYPE = effect(ElseEffect.class)
+		.syntaxes("else:<section>")
+		.create((children, matchedPattern) -> new ElseEffect((SectionNode) children.getFirst()))
+		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {
