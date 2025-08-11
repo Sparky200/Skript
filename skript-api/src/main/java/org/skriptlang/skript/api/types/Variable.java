@@ -71,7 +71,7 @@ public interface Variable extends SkriptValueOrVariable {
 		};
 	}
 
-	SkriptValueType<?> valueType();
+	RuntimeSkriptType<?> valueType();
 
 	@Override
 	default SkriptValue toValue() {
@@ -79,8 +79,8 @@ public interface Variable extends SkriptValueOrVariable {
 	}
 
 	/**
-	 * A variable that's wrapped around some {@link SkriptProperty}.
-	 * This is essentially a wrapper around {@link SkriptProperty} for a specific receiver.
+	 * A variable that's wrapped around some {@link RuntimeSkriptProperty}.
+	 * This is essentially a wrapper around {@link RuntimeSkriptProperty} for a specific receiver.
 	 * @param <TReceiver>
 	 * @param <TValue>
 	 */

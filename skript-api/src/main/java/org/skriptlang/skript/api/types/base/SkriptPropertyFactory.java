@@ -3,7 +3,7 @@ package org.skriptlang.skript.api.types.base;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.types.SkriptValue;
-import org.skriptlang.skript.api.types.StagedSkriptProperty;
+import org.skriptlang.skript.api.types.SkriptProperty;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -72,7 +72,7 @@ public final class SkriptPropertyFactory<TReceiver extends SkriptValue, TValue e
 		return this;
 	}
 
-	public StagedSkriptProperty<TReceiver, TValue> build() {
+	public SkriptProperty<TReceiver, TValue> build() {
 		Preconditions.checkNotNull(getter, "getter must be set on properties");
 		return new DelegatingStagedSkriptProperty<>(
 			valueClass,

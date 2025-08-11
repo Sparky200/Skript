@@ -31,11 +31,6 @@ public record InputNode(@NotNull String inputName) implements ExpressionNode<Var
 		}
 
 		@Override
-		public Class<Variable> getReturnType() {
-			return Variable.class;
-		}
-
-		@Override
 		public @NotNull InputNode create(List<SyntaxNode> children, int matchedPattern) {
 			return new InputNode(inputName);
 		}

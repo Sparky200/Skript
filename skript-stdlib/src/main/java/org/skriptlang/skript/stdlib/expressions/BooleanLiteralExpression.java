@@ -9,11 +9,12 @@ import org.skriptlang.skript.api.types.BooleanValue;
 
 import java.util.List;
 
-public class BooleanLiteralExpression implements ExpressionNode<BooleanValue> {
-	public static final ExpressionNodeType<BooleanLiteralExpression, BooleanValue> TYPE = new ExpressionNodeType<>() {
+public class BooleanLiteralExpression implements ExpressionNode {
+
+	public static final ExpressionNodeType<BooleanLiteralExpression> TYPE = new ExpressionNodeType<>() {
 		@Override
-		public Class<BooleanValue> getReturnType() {
-			return BooleanValue.class;
+		public String[] possibleReturnTypes() {
+			return new String[] { BooleanValue.TYPE.typeName() };
 		}
 
 		@Override

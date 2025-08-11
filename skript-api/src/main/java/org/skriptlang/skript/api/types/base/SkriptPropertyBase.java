@@ -2,12 +2,12 @@ package org.skriptlang.skript.api.types.base;
 
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
-import org.skriptlang.skript.api.types.SkriptProperty;
+import org.skriptlang.skript.api.types.RuntimeSkriptProperty;
 import org.skriptlang.skript.api.types.SkriptValue;
-import org.skriptlang.skript.api.types.SkriptValueType;
+import org.skriptlang.skript.api.types.RuntimeSkriptType;
 import org.skriptlang.skript.api.types.Variable;
 
-public abstract class SkriptPropertyBase<TReceiver extends SkriptValue, TValue extends SkriptValue> implements SkriptProperty<TReceiver, TValue> {
+public abstract class SkriptPropertyBase<TReceiver extends SkriptValue, TValue extends SkriptValue> implements RuntimeSkriptProperty<TReceiver, TValue> {
 	private final @NotNull SkriptRuntime runtime;
 	private final @NotNull Class<TValue> valueClass;
 
@@ -22,7 +22,7 @@ public abstract class SkriptPropertyBase<TReceiver extends SkriptValue, TValue e
 	}
 
 	@Override
-	public final SkriptValueType<TValue> valueType() {
+	public final RuntimeSkriptType<TValue> valueType() {
 		return runtime.getTypeByClass(valueClass);
 	}
 

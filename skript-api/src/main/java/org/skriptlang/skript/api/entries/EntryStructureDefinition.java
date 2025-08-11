@@ -1,6 +1,8 @@
 package org.skriptlang.skript.api.entries;
 
 import com.google.common.collect.ImmutableList;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +31,8 @@ public final class EntryStructureDefinition {
 		return entry(name, syntax, false);
 	}
 
-	public static Builder entryStructure() {
+	@Contract(" -> new")
+	public static @NotNull Builder entryStructure() {
 		return new Builder();
 	}
 
@@ -50,7 +53,8 @@ public final class EntryStructureDefinition {
 			return this;
 		}
 
-		public EntryStructureDefinition build() {
+		@Contract(" -> new")
+		public @NotNull EntryStructureDefinition build() {
 			return new EntryStructureDefinition(entries);
 		}
 	}

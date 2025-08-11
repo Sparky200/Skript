@@ -8,15 +8,15 @@ import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.BooleanValue;
 import org.skriptlang.skript.api.types.NoneValue;
 import org.skriptlang.skript.api.types.SkriptValue;
-import org.skriptlang.skript.api.util.ExecuteResult;
 
 import java.util.List;
 
-public class NotExpression implements ExpressionNode<SkriptValue> {
-	public static final ExpressionNodeType<NotExpression, SkriptValue> TYPE = new ExpressionNodeType<>() {
+public class NotExpression implements ExpressionNode {
+	public static final ExpressionNodeType<NotExpression> TYPE = new ExpressionNodeType<>() {
+
 		@Override
-		public Class<SkriptValue> getReturnType() {
-			return SkriptValue.class;
+		public String[] possibleReturnTypes() {
+			return new String[] { BooleanValue.TYPE.typeName() };
 		}
 
 		@Override
@@ -26,13 +26,13 @@ public class NotExpression implements ExpressionNode<SkriptValue> {
 
 		@Override
 		public @NotNull NotExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new NotExpression((ExpressionNode<?>) children.getFirst());
+			return new NotExpression((ExpressionNode) children.getFirst());
 		}
 	};
 
-	private final ExpressionNode<?> rhsSelector;
+	private final ExpressionNode rhsSelector;
 
-	public NotExpression(final ExpressionNode<?> rhsSelector) {
+	public NotExpression(ExpressionNode rhsSelector) {
 		this.rhsSelector = rhsSelector;
 	}
 

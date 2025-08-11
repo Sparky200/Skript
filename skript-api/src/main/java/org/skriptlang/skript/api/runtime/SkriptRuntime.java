@@ -18,14 +18,14 @@ public interface SkriptRuntime {
 	 * @param value the value to resolve the type of
 	 * @return the type of the value
 	 */
-	@NotNull SkriptValueType<?> typeOf(@NotNull SkriptValue value);
+	@NotNull RuntimeSkriptType<?> typeOf(@NotNull SkriptValue value);
 
 	/**
 	 * Resolves a type by its name.
 	 * @param name the name of the type
 	 * @return the type, or null if not found
 	 */
-	@Nullable SkriptValueType<?> getTypeByName(@NotNull String name);
+	@Nullable RuntimeSkriptType<?> getTypeByName(@NotNull String name);
 
 	/**
 	 * Resolves a type by the class of the value.
@@ -35,14 +35,14 @@ public interface SkriptRuntime {
 	 * @return the type, or null if not found
 	 * @param <T> the type of the value
 	 */
-	<T extends SkriptValue> @Nullable SkriptValueType<T> getTypeByClass(@NotNull Class<T> clazz);
+	<T extends SkriptValue> @Nullable RuntimeSkriptType<T> getTypeByClass(@NotNull Class<T> clazz);
 
 	/**
 	 * Resolves the name of a type using the runtime's type storage.
 	 * @param type the type to resolve the name of
 	 * @return the name of the type
 	 */
-    @NotNull String getNameOfType(@NotNull SkriptValueType<?> type);
+    @NotNull String getNameOfType(@NotNull RuntimeSkriptType<?> type);
 
     /**
 	 * Adds a type to the runtime. This method is only available before the runtime is locked.
@@ -50,7 +50,7 @@ public interface SkriptRuntime {
 	 * @return the constructed type
 	 * @param <T> the type of the value
 	 */
-	<T extends SkriptValue> @NotNull SkriptValueType<T> addType(@NotNull StagedSkriptValueType<T> type);
+	<T extends SkriptValue> @NotNull RuntimeSkriptType<T> addType(@NotNull SkriptType<T> type);
 
 	/**
 	 * Gets the global context for this runtime. This is the parent-less context that all other contexts are derived from.
@@ -67,7 +67,7 @@ public interface SkriptRuntime {
 	 * @param <TReceiver> the type of the receiver
 	 * @param <TValue> the type of the value
 	 */
-	@NotNull <TReceiver extends SkriptValue, TValue extends SkriptValue> Variable.OfProperty<TReceiver, TValue> wrapProperty(SkriptProperty<TReceiver, TValue> property, TReceiver receiver);
+	@NotNull <TReceiver extends SkriptValue, TValue extends SkriptValue> Variable.OfProperty<TReceiver, TValue> wrapProperty(RuntimeSkriptProperty<TReceiver, TValue> property, TReceiver receiver);
 
 	/**
 	 * Loads a script into the runtime.

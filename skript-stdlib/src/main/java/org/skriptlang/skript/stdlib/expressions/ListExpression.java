@@ -12,11 +12,12 @@ import org.skriptlang.skript.api.types.SkriptValueOrVariable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ListExpression implements ExpressionNode<ListValue> {
-	public static final ExpressionNodeType<ListExpression, ListValue> TYPE = new ExpressionNodeType<>() {
+public class ListExpression implements ExpressionNode {
+	public static final ExpressionNodeType<ListExpression> TYPE = new ExpressionNodeType<>() {
+
 		@Override
-		public Class<ListValue> getReturnType() {
-			return ListValue.class;
+		public String[] possibleReturnTypes() {
+			return new String[] { ListValue.TYPE.typeName() };
 		}
 
 		@Override
@@ -28,16 +29,16 @@ public class ListExpression implements ExpressionNode<ListValue> {
 
 		@Override
 		public @NotNull ListExpression create(List<SyntaxNode> children, int matchedPattern) {
-			ExpressionNode<?> first = (ExpressionNode<?>) children.get(0);
-			ExpressionNode<?> second = (ExpressionNode<?>) children.get(1);
+			ExpressionNode first = (ExpressionNode) children.get(0);
+			ExpressionNode second = (ExpressionNode) children.get(1);
 			return new ListExpression(first, second);
 		}
 	};
 
-	private final ExpressionNode<?> firstSelector;
-	private final ExpressionNode<?> secondSelector;
+	private final ExpressionNode firstSelector;
+	private final ExpressionNode secondSelector;
 
-	public ListExpression(ExpressionNode<?> firstSelector, ExpressionNode<?> secondSelector) {
+	public ListExpression(ExpressionNode firstSelector, ExpressionNode secondSelector) {
 		this.firstSelector = firstSelector;
 		this.secondSelector = secondSelector;
 	}

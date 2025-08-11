@@ -6,7 +6,7 @@ import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.ListValue;
 import org.skriptlang.skript.api.types.NoneValue;
 import org.skriptlang.skript.api.types.SkriptValueOrVariable;
-import org.skriptlang.skript.api.types.SkriptValueType;
+import org.skriptlang.skript.api.types.RuntimeSkriptType;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,11 +32,11 @@ public class MultiMatchExpressionNode implements ExpressionNode<SkriptValueOrVar
 		this.desiredTypeName = desiredTypeName != null ? desiredTypeName : "any";
 	}
 
-	private List<SkriptValueType<?>> createAllowedTypes(ExecuteContext context, SkriptValueType<?> desiredType) {
-		List<SkriptValueType<?>> allowedTypes = new LinkedList<>();
+	private List<RuntimeSkriptType<?>> createAllowedTypes(ExecuteContext context, RuntimeSkriptType<?> desiredType) {
+		List<RuntimeSkriptType<?>> allowedTypes = new LinkedList<>();
 		// may be a list
 		allowedTypes.add(context.runtime().getTypeByName("list"));
-		SkriptValueType<?> current = desiredType;
+		RuntimeSkriptType<?> current = desiredType;
 
 		while (current != null) {
 			allowedTypes.add(current);
@@ -50,10 +50,10 @@ public class MultiMatchExpressionNode implements ExpressionNode<SkriptValueOrVar
 	public @NotNull SkriptValueOrVariable resolve(@NotNull ExecuteContext context) {
 		// note properties will be preferred over values (will return property if possible)
 
-		SkriptValueType<?> desiredType = context.runtime().getTypeByName(desiredTypeName);
+		RuntimeSkriptType<?> desiredType = context.runtime().getTypeByName(desiredTypeName);
 		if (desiredType == null) throw new IllegalStateException("Desired type not found: " + desiredTypeName);
 
-		List<SkriptValueType<?>> allowedTypes = createAllowedTypes(context, desiredType);
+		List<RuntimeSkriptType<?>> allowedTypes = createAllowedTypes(context, desiredType);
 
 
 		for (ExpressionNode<?> possibleMatch : possibleMatches) {

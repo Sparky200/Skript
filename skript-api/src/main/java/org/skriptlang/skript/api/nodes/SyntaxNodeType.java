@@ -32,4 +32,15 @@ public interface SyntaxNodeType<T extends SyntaxNode> {
 		return true;
 	}
 
+	/**
+	 * Filters the allowed parent node types.
+	 * This has similar behavior to {@link #canBeParsed(ParseContext, int)}
+	 * but is more locked down in favor of moving to
+	 * more structure-based parsing conditions.
+	 * IF this method returns an empty array (default), it may appear <i>anywhere</i>.
+	 */
+	default SyntaxNodeType<?>[] allowedParents() {
+		return new SyntaxNodeType<?>[0];
+	}
+
 }

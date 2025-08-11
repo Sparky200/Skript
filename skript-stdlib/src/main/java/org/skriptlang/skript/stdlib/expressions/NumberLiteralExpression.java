@@ -10,11 +10,11 @@ import org.skriptlang.skript.api.types.NumberValue;
 
 import java.util.List;
 
-public class NumberLiteralExpression implements ExpressionNode<NumberValue> {
-	public static final ExpressionNodeType<NumberLiteralExpression, NumberValue> TYPE = new ExpressionNodeType<>() {
+public class NumberLiteralExpression implements ExpressionNode {
+	public static final ExpressionNodeType<NumberLiteralExpression> TYPE = new ExpressionNodeType<>() {
 		@Override
-		public Class<NumberValue> getReturnType() {
-			return NumberValue.class;
+		public String[] possibleReturnTypes() {
+			return new String[] { NumberValue.TYPE.typeName() };
 		}
 
 		@Override

@@ -20,10 +20,10 @@ public sealed abstract class VariableImpl implements Variable permits VariableIm
 	}
 
 	public static final class OfProperty<TReceiver extends SkriptValue, TValue extends SkriptValue> extends VariableImpl implements Variable.OfProperty<TReceiver, TValue> {
-		private final @NotNull SkriptProperty<TReceiver, TValue> property;
+		private final @NotNull RuntimeSkriptProperty<TReceiver, TValue> property;
 		private final @NotNull TReceiver receiver;
 
-		public OfProperty(@NotNull SkriptRuntime runtime, @NotNull SkriptProperty<TReceiver, TValue> property, @NotNull TReceiver receiver) {
+		public OfProperty(@NotNull SkriptRuntime runtime, @NotNull RuntimeSkriptProperty<TReceiver, TValue> property, @NotNull TReceiver receiver) {
 			super(runtime);
 			this.property = property;
 			this.receiver = receiver;
@@ -62,7 +62,7 @@ public sealed abstract class VariableImpl implements Variable permits VariableIm
 		}
 
 		@Override
-		public SkriptValueType<?> valueType() {
+		public RuntimeSkriptType<?> valueType() {
 			return property.valueType();
 		}
 
@@ -101,7 +101,7 @@ public sealed abstract class VariableImpl implements Variable permits VariableIm
 		}
 
 		@Override
-		public SkriptValueType<?> valueType() {
+		public RuntimeSkriptType<?> valueType() {
 			return value.getType(runtime());
 		}
 	}

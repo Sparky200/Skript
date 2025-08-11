@@ -9,11 +9,11 @@ import org.skriptlang.skript.api.types.NoneValue;
 
 import java.util.List;
 
-public class NoneLiteralExpression implements ExpressionNode<NoneValue> {
-	public static final ExpressionNodeType<NoneLiteralExpression, NoneValue> TYPE = new ExpressionNodeType<>() {
+public class NoneLiteralExpression implements ExpressionNode {
+	public static final ExpressionNodeType<NoneLiteralExpression> TYPE = new ExpressionNodeType<>() {
 		@Override
-		public Class<NoneValue> getReturnType() {
-			return NoneValue.class;
+		public String[] possibleReturnTypes() {
+			return new String[] { NoneValue.TYPE_NAME };
 		}
 
 		@Override

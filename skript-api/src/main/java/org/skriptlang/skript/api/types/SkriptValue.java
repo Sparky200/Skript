@@ -3,7 +3,7 @@ package org.skriptlang.skript.api.types;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 
-import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 /**
  * The base class for a skript value. This is akin to {@link Object} in Java.
@@ -13,7 +13,7 @@ import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skript
  * unless it's difficult to distinguish from a related class.
  */
 public class SkriptValue implements SkriptValueOrVariable {
-	public static final StagedSkriptValueType<SkriptValue> TYPE = skriptType("any", SkriptValue.class).build();
+	public static final SkriptType<SkriptValue> TYPE = skriptType("any", SkriptValue.class).build();
 
 	/**
 	 * Gets the type of this value in the current runtime.
@@ -21,7 +21,7 @@ public class SkriptValue implements SkriptValueOrVariable {
 	 * @param runtime the runtime that stores type information.
 	 * @return the type of this value
 	 */
-	public final SkriptValueType<?> getType(SkriptRuntime runtime) {
+	public final RuntimeSkriptType<?> getType(SkriptRuntime runtime) {
 		return runtime.typeOf(this);
 	}
 

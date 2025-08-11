@@ -11,12 +11,8 @@ import org.skriptlang.skript.api.types.SkriptValueOrVariable;
 
 import java.util.List;
 
-public class VariableExpression implements ExpressionNode<SkriptValueOrVariable> {
-	public static final ExpressionNodeType<VariableExpression, SkriptValueOrVariable> TYPE = new ExpressionNodeType<>() {
-		@Override
-		public Class<SkriptValueOrVariable> getReturnType() {
-			return SkriptValueOrVariable.class;
-		}
+public class VariableExpression implements ExpressionNode {
+	public static final ExpressionNodeType<VariableExpression> TYPE = new ExpressionNodeType<>() {
 
 		@Override
 		public List<String> getSyntaxes() {

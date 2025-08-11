@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 
+import java.util.Map;
+
 /**
  * A type describing a certain skript value.
  * <p>
@@ -14,7 +16,13 @@ import org.skriptlang.skript.api.runtime.SkriptRuntime;
  * <p>
  * These value types will be constructed based on those intermediate types when the runtime is constructed.
  */
-public interface SkriptValueType<T extends SkriptValue> {
+public interface RuntimeSkriptType<T extends SkriptValue> {
+
+	/**
+	 * The pre-runtime source that this runtime type was generated off of.
+	 * @return The source.
+	 */
+	@NotNull SkriptType<T> source();
 
 	/**
 	 * The runtime that owns this type.
@@ -25,7 +33,7 @@ public interface SkriptValueType<T extends SkriptValue> {
 	/**
 	 * The supertype of this type. This should only be null for the root type representing {@link SkriptValue} directly.
 	 */
-	@Nullable SkriptValueType<?> superType();
+	@Nullable RuntimeSkriptType<?> superType();
 
 	default @NotNull String name() {
 		return runtime().getNameOfType(this);
@@ -47,14 +55,14 @@ public interface SkriptValueType<T extends SkriptValue> {
 	 * @param type the type to check
 	 * @return true if this type is a subtype of the given type
 	 */
-	boolean isSubtypeOf(SkriptValueType<?> type);
+	boolean isSubtypeOf(RuntimeSkriptType<?> type);
 
 	/**
 	 * Check if this type is a supertype of the given type.
 	 * @param type the type to check
 	 * @return true if this type is a supertype of the given type
 	 */
-	default boolean isSupertypeOf(SkriptValueType<?> type) {
+	default boolean isSupertypeOf(RuntimeSkriptType<?> type) {
 		return type.isSubtypeOf(this);
 	}
 
@@ -70,7 +78,12 @@ public interface SkriptValueType<T extends SkriptValue> {
 	 * @param name the name of the property
 	 * @return the property, or null if not found
 	 */
-	@Nullable SkriptProperty<? super T, ?> getProperty(String name);
+	@Nullable RuntimeSkriptProperty<? super T, ?> getProperty(String name);
+
+	/**
+	 * Returns an immutable view of the properties on this type.
+	 */
+	@NotNull Map<String, RuntimeSkriptProperty<? super T, ?>> properties();
 
 	/**
 	 * Get the JVM class that this type represents.

@@ -7,13 +7,13 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 /**
  * Marks an object that can be used in iterative syntax.
  */
 public abstract class IterableValue extends SkriptValue implements Iterable<SkriptValue> {
-	public static final StagedSkriptValueType<IterableValue> TYPE = skriptType("iterable", IterableValue.class)
+	public static final SkriptType<IterableValue> TYPE = skriptType("iterable", IterableValue.class)
 		.build();
 
 	/**

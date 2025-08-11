@@ -10,11 +10,12 @@ import org.skriptlang.skript.api.types.StringValue;
 
 import java.util.List;
 
-public class StringLiteralExpression implements ExpressionNode<StringValue> {
-	public static final ExpressionNodeType<StringLiteralExpression, StringValue> TYPE = new ExpressionNodeType<>() {
+public class StringLiteralExpression implements ExpressionNode {
+	public static final ExpressionNodeType<StringLiteralExpression> TYPE = new ExpressionNodeType<>() {
+
 		@Override
-		public Class<StringValue> getReturnType() {
-			return StringValue.class;
+		public String[] possibleReturnTypes() {
+			return new String[] { StringValue.TYPE.typeName() };
 		}
 
 		@Override
@@ -28,9 +29,9 @@ public class StringLiteralExpression implements ExpressionNode<StringValue> {
 		}
 	};
 
-	private final ExpressionNode<?> stringTokenSelector;
+	private final ExpressionNode stringTokenSelector;
 
-	public StringLiteralExpression(ExpressionNode<?> stringTokenSelector) {
+	public StringLiteralExpression(ExpressionNode stringTokenSelector) {
 		this.stringTokenSelector = stringTokenSelector;
 	}
 

@@ -3,6 +3,7 @@ package org.skriptlang.skript.api.util;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.types.ErrorValue;
+import org.skriptlang.skript.api.types.SkriptValue;
 
 /**
  * The result of executing a statement.
@@ -14,7 +15,7 @@ import org.skriptlang.skript.api.types.ErrorValue;
  * A failed execution should return a {@link Failure} using {@link #failure(ErrorValue)},
  * which should contain a reason for the failure.
  */
-public sealed interface ExecuteResult permits ExecuteResult.Success, ExecuteResult.Failure {
+public sealed interface ExecuteResult permits ExecuteResult.Success, ExecuteResult.Failure, ExecuteResult.Returning {
 	/**
 	 * The singleton instance of {@link Success}.
 	 * API should use {@link #success()} to get this singleton.
@@ -38,6 +39,10 @@ public sealed interface ExecuteResult permits ExecuteResult.Success, ExecuteResu
 		return new Failure(reason);
 	}
 
+	static @NotNull Returning returning(@NotNull SkriptValue returnValue) {
+		return new Returning(returnValue);
+	}
+
 	/**
 	 * Represents a successful execution. Success utilizes a singleton pattern and should not be instantiated.
 	 */
@@ -45,6 +50,7 @@ public sealed interface ExecuteResult permits ExecuteResult.Success, ExecuteResu
 		private Success() {}
 	}
 	record Failure(ErrorValue reason) implements ExecuteResult {}
+	record Returning(@NotNull SkriptValue returnValue) implements ExecuteResult {}
 
 
 
