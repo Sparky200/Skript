@@ -2,11 +2,10 @@ package org.skriptlang.skript.api.types;
 
 import org.jetbrains.annotations.Nullable;
 
-import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 public class NumberValue extends SkriptValue {
-	public static final StagedSkriptValueType<NumberValue> TYPE = skriptType("number", NumberValue.class)
-		.superType("any")
+	public static final SkriptType<NumberValue> TYPE = skriptType("number", NumberValue.class)
 		.build();
 
 	private final double value;

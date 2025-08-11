@@ -1,15 +1,13 @@
 package org.skriptlang.skript.api.types;
 
 import static org.skriptlang.skript.api.types.base.SkriptPropertyFactory.skriptProperty;
-import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 /**
  * A simple Skript value that holds a string.
  */
 public final class StringValue extends SkriptValue {
-	public static final StagedSkriptValueType<StringValue> TYPE = skriptType("string", StringValue.class)
-		// not required, any is default
-		.superType("any")
+	public static final SkriptType<StringValue> TYPE = skriptType("string", StringValue.class)
 		.property("length", skriptProperty(StringValue.class, NumberValue.class)
 			.getter(StringValue::length)
 		)

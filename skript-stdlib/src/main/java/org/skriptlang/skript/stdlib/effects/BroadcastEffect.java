@@ -4,30 +4,16 @@ import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.EffectNode;
 import org.skriptlang.skript.api.nodes.EffectNodeType;
 import org.skriptlang.skript.api.nodes.ExpressionNode;
-import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.util.ExecuteResult;
 
-import java.util.List;
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 
-public class BroadcastEffect implements EffectNode {
-	public static final EffectNodeType<BroadcastEffect> TYPE = new EffectNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("broadcast <expr>");
-		}
-
-		@Override
-		public @NotNull BroadcastEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new BroadcastEffect((ExpressionNode<?>) children.getFirst());
-		}
-	};
-
-	private final ExpressionNode<?> valueSelector;
-
-	public BroadcastEffect(ExpressionNode<?> valueSelector) {
-		this.valueSelector = valueSelector;
-	}
+public record BroadcastEffect(ExpressionNode valueSelector) implements EffectNode {
+	public static final EffectNodeType<BroadcastEffect> TYPE = effect(BroadcastEffect.class)
+		.syntaxes("broadcast <expr>")
+		.create((children, unused) -> new BroadcastEffect((ExpressionNode) children.getFirst()))
+		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {

@@ -9,29 +9,17 @@ import org.skriptlang.skript.api.types.BooleanValue;
 
 import java.util.List;
 
-public class BooleanLiteralExpression implements ExpressionNode<BooleanValue> {
-	public static final ExpressionNodeType<BooleanLiteralExpression, BooleanValue> TYPE = new ExpressionNodeType<>() {
-		@Override
-		public Class<BooleanValue> getReturnType() {
-			return BooleanValue.class;
-		}
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.expression;
 
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("true", "false");
-		}
+public record BooleanLiteralExpression(boolean value) implements ExpressionNode {
 
-		@Override
-		public @NotNull BooleanLiteralExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new BooleanLiteralExpression(matchedPattern == 0);
-		}
-	};
-
-	private final boolean value;
-
-	public BooleanLiteralExpression(boolean value) {
-		this.value = value;
-	}
+	public static final ExpressionNodeType<BooleanLiteralExpression> TYPE = expression(BooleanLiteralExpression.class)
+		.syntaxes("true", "false")
+		.possibleReturnTypes(BooleanValue.TYPE)
+		.create((children, matchedPattern) ->
+			new BooleanLiteralExpression(matchedPattern == 0)
+		)
+		.build();
 
 	@Override
 	public @NotNull BooleanValue resolve(@NotNull ExecuteContext context) {

@@ -377,10 +377,10 @@ public final class SkriptParserImpl implements SkriptParser {
 
 				if (token.type() == TokenType.STRING) {
 					// special case for string tokens
-					List<ExpressionNode<?>> children = new LinkedList<>();
+					List<ExpressionNode> children = new LinkedList<>();
 					// TODO: string template context
 					for (List<Token> subTokens : Objects.requireNonNull(token.children())) {
-						Match<ExpressionNode<?>> expression = parseExpression(context, subTokens, "string");
+						Match<ExpressionNode> expression = parseExpression(context, subTokens, "string");
 						if (expression == null) {
 							context.error("Failed to parse string template expression", subTokens.getFirst().start());
 							return null;
@@ -404,7 +404,7 @@ public final class SkriptParserImpl implements SkriptParser {
 		return match;
 	}
 
-	private Match<ExpressionNode<?>> parseExpression(
+	private Match<ExpressionNode> parseExpression(
 		@NotNull ParseContextImpl context,
 		@NotNull List<Token> tokens,
 		@Nullable String desiredTypeName
@@ -423,14 +423,14 @@ public final class SkriptParserImpl implements SkriptParser {
 
 		if (candidateNodes.length > 1) {
 			return new Match<>(new MultiMatchExpressionNode(
-				Arrays.stream(candidateNodes).map(it -> (ExpressionNode<?>) it.node()).toList(),
+				Arrays.stream(candidateNodes).map(it -> (ExpressionNode) it.node()).toList(),
 				desiredTypeName
 			), tokens.size());
 		}
 
 		Match<?> selected = candidateNodes[0];
 		if (selected == null) return null;
-		return new Match<>((ExpressionNode<?>) selected.node(), selected.length());
+		return new Match<>((ExpressionNode) selected.node(), selected.length());
 	}
 
 	private Match<StructureSectionNode> parseEntries(

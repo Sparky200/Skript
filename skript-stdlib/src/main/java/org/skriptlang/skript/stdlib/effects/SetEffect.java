@@ -12,37 +12,26 @@ import org.skriptlang.skript.stdlib.expressions.VariableExpression;
 
 import java.util.List;
 
-public class SetEffect implements EffectNode {
-	public static final EffectNodeType<SetEffect> TYPE = new EffectNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("set <expr> to <expr>");
-		}
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 
-		@Override
-		public @NotNull SetEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new SetEffect((ExpressionNode<?>) children.getFirst(), (ExpressionNode<?>) children.get(1));
-		}
-	};
-
-	private final ExpressionNode<?> receiverSelector;
-	private final ExpressionNode<?> valueSelector;
-
-	public SetEffect(ExpressionNode<?> receiverSelector, ExpressionNode<?> valueSelector) {
-		this.receiverSelector = receiverSelector;
-		this.valueSelector = valueSelector;
-	}
+public record SetEffect(ExpressionNode receiverSelector, ExpressionNode valueSelector) implements EffectNode {
+	public static final EffectNodeType<SetEffect> TYPE = effect(SetEffect.class)
+		.syntaxes("set <expr> to <expr>")
+		.create((children, matchedPattern) ->
+			new SetEffect((ExpressionNode) children.getFirst(), (ExpressionNode) children.getLast())
+		)
+		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {
 		SkriptValueOrVariable receiver = receiverSelector.resolve(context);
 		Variable variable = null;
 		if (receiver instanceof NoneValue) {
-			if (receiverSelector instanceof VariableExpression varExpr) {
+			if (receiverSelector instanceof VariableExpression(String name)) {
 				// this case covers a special case
 				// where a variable expression will return NoneValue because the variable is not set.
 				// since it's the set effect, we just create a new variable.
-				variable = context.setVariable(varExpr.name());
+				variable = context.setVariable(name);
 			} else {
 				return ExecuteResult.failure(new ErrorValue("Cannot set <none> to a value"));
 			}

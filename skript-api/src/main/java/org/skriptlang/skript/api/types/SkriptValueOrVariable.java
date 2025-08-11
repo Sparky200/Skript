@@ -3,6 +3,10 @@ package org.skriptlang.skript.api.types;
 /**
  * A union between a value and a property.
  * This is mainly only used for type bounding.
+ * <p>
+ * This should <b>NOT</b> be directly inherited, and is only unsealed due to language restrictions.
+ * @see SkriptValue
+ * @see Variable
  */
 public interface SkriptValueOrVariable {
 	/**

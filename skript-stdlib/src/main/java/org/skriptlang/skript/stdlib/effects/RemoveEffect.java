@@ -12,29 +12,13 @@ import org.skriptlang.skript.api.util.TypeOperationUtils;
 
 import java.util.List;
 
-public class RemoveEffect implements EffectNode {
-	public static final EffectNodeType<RemoveEffect> TYPE = new EffectNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("remove <expr> from <expr>");
-		}
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 
-		@Override
-		public @NotNull RemoveEffect create(@NotNull List<SyntaxNode> children, int matchedPattern) {
-			return new RemoveEffect(
-				(ExpressionNode<?>) children.get(0),
-				(ExpressionNode<?>) children.get(1)
-			);
-		}
-	};
-
-	private final ExpressionNode<?> valueSelector;
-	private final ExpressionNode<?> receiverSelector;
-
-	public RemoveEffect(ExpressionNode<?> valueSelector, ExpressionNode<?> receiverSelector) {
-		this.valueSelector = valueSelector;
-		this.receiverSelector = receiverSelector;
-	}
+public record RemoveEffect(ExpressionNode valueSelector, ExpressionNode receiverSelector) implements EffectNode {
+	public static final EffectNodeType<RemoveEffect> TYPE = effect(RemoveEffect.class)
+		.syntaxes("remove <expr> from <expr>")
+		.create((children, matchedPattern) -> new RemoveEffect((ExpressionNode) children.getFirst(), (ExpressionNode) children.getLast()))
+		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {

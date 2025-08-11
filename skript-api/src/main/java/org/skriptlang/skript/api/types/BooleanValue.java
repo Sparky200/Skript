@@ -1,9 +1,9 @@
 package org.skriptlang.skript.api.types;
 
-import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 public class BooleanValue extends SkriptValue {
-	public static final StagedSkriptValueType<BooleanValue> TYPE = skriptType("boolean", BooleanValue.class)
+	public static final SkriptType<BooleanValue> TYPE = skriptType("boolean", BooleanValue.class)
 		.build();
 
 	private final boolean value;

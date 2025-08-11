@@ -7,11 +7,11 @@ import org.skriptlang.skript.api.types.StringValue;
 
 import java.util.List;
 
-public class StringNode implements ExpressionNode<StringValue> {
+public class StringNode implements ExpressionNode {
 	private final String base;
-	private final List<ExpressionNode<?>> childrenSelectors;
+	private final List<ExpressionNode> childrenSelectors;
 
-	public StringNode(String base, List<ExpressionNode<?>> children) {
+	public StringNode(String base, List<ExpressionNode> children) {
 		this.base = base.startsWith("\"") && base.endsWith("\"") ? base.substring(1, base.length() - 1) : base;
 		this.childrenSelectors = ImmutableList.copyOf(children);
 	}

@@ -2,10 +2,10 @@ package org.skriptlang.skript.api.types;
 
 import org.jetbrains.annotations.NotNull;
 
-import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 public class ErrorValue extends SkriptValue {
-	public static final StagedSkriptValueType<ErrorValue> TYPE = skriptType("error", ErrorValue.class)
+	public static final SkriptType<ErrorValue> TYPE = skriptType("error", ErrorValue.class)
 		.build();
 
 	private final StringValue message;

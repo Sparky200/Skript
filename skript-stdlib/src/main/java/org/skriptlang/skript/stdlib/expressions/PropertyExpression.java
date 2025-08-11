@@ -10,33 +10,16 @@ import org.skriptlang.skript.api.types.*;
 
 import java.util.List;
 
-public final class PropertyExpression implements ExpressionNode<Variable.OfProperty<?, ?>> {
-	public static final ExpressionNodeType<PropertyExpression, Variable.OfProperty<?, ?>> TYPE = new ExpressionNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of(
-				"<token::identifier> of <expr>"
-			);
-		}
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.expression;
 
-		@Override
-		public Class<Variable.OfProperty<?, ?>> getReturnType() {
-			return null;
-		}
+public record PropertyExpression(String propertyName, ExpressionNode receiverSelector) implements ExpressionNode {
 
-		@Override
-		public @NotNull PropertyExpression create(List<SyntaxNode> children, int matchedPattern) {
-			return new PropertyExpression(((TokenNode) children.getFirst()).tokenContents(), (ExpressionNode<?>) children.get(1));
-		}
-	};
-
-	private final String propertyName;
-	private final ExpressionNode<?> receiverSelector;
-
-	public PropertyExpression(String propertyName, ExpressionNode<?> receiverSelector) {
-		this.propertyName = propertyName;
-		this.receiverSelector = receiverSelector;
-	}
+	public static final ExpressionNodeType<PropertyExpression> TYPE = expression(PropertyExpression.class)
+		.syntaxes("<token::identifier> of <expr>")
+		.create((children, matchedPattern) ->
+			new PropertyExpression(((TokenNode) children.getFirst()).tokenContents(), (ExpressionNode) children.get(1))
+		)
+		.build();
 
 	@Override
 	public @NotNull Variable.OfProperty<?, ?> resolve(@NotNull ExecuteContext context) {
@@ -52,9 +35,9 @@ public final class PropertyExpression implements ExpressionNode<Variable.OfPrope
 		// TODO: need a way to feed an ExecuteResult out of an expression
 		if (receiver == null) throw new IllegalStateException("Cannot get property of a non-variable");
 
-		SkriptValueType<?> type = receiver.getType(context.runtime());
+		RuntimeSkriptType<?> type = receiver.getType(context.runtime());
 
-		SkriptProperty<?, ?> prop = type.getProperty(propertyName);
+		RuntimeSkriptProperty<?, ?> prop = type.getProperty(propertyName);
 		if (prop == null) {
 			// TODO: SkriptValueType should have a type name
 			throw new IllegalStateException("Property '" + propertyName + "' does not exist on type '" + type.name() + "'");

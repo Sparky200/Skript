@@ -4,10 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.script.Script;
 
 import static org.skriptlang.skript.api.types.base.SkriptPropertyFactory.skriptProperty;
-import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 public final class ScriptInfoValue extends SkriptValue {
-	public static final StagedSkriptValueType<ScriptInfoValue> TYPE = skriptType("script_info", ScriptInfoValue.class)
+	public static final SkriptType<ScriptInfoValue> TYPE = skriptType("script_info", ScriptInfoValue.class)
 		.property("name", skriptProperty(ScriptInfoValue.class, StringValue.class)
 			.getter(ScriptInfoValue::name)
 		)

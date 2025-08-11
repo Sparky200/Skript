@@ -18,8 +18,8 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 
 	private final @NotNull ExecuteContext globalContext = new ExecuteContextImpl(this, null);
 
-	private final Map<String, SkriptValueType<?>> typesByName = new LinkedHashMap<>();
-	private final Map<Class<?>, SkriptValueType<?>> typesByClass = new LinkedHashMap<>();
+	private final Map<String, RuntimeSkriptType<?>> typesByName = new LinkedHashMap<>();
+	private final Map<Class<?>, RuntimeSkriptType<?>> typesByClass = new LinkedHashMap<>();
 
 	private final Set<Script> loadingScripts = new LinkedHashSet<>();
 	private final Map<Script, ExecuteContext> loadedScripts = new ConcurrentHashMap<>();
@@ -27,31 +27,31 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 	public SkriptRuntimeImpl(LockAccess lockAccess) {
 		this.lockAccess = lockAccess;
 		addConstructedType(SkriptValue.TYPE.typeName(), SkriptValue.TYPE.construct(this));
-		addConstructedType(NoneValue.TYPE_NAME, NoneValue.TYPE.construct(this));
+		addConstructedType(NoneValue.TYPE.typeName(), NoneValue.TYPE.construct(this));
 	}
 
 	/**
 	 * @implNote values must have a type, otherwise addons are doing something they shouldn't be doing
 	 */
 	@Override
-	public @NotNull SkriptValueType<?> typeOf(@NotNull SkriptValue value) {
+	public @NotNull RuntimeSkriptType<?> typeOf(@NotNull SkriptValue value) {
 		return Objects.requireNonNull(getTypeByClass(value.getClass()));
 	}
 
 	@Override
-	public @Nullable SkriptValueType<?> getTypeByName(@NotNull String name) {
+	public @Nullable RuntimeSkriptType<?> getTypeByName(@NotNull String name) {
 		return typesByName.get(name);
 	}
 
 	@Override
-	public @Nullable <T extends SkriptValue> SkriptValueType<T> getTypeByClass(@NotNull Class<T> clazz) {
-		SkriptValueType<?> type = typesByClass.get(clazz);
+	public @Nullable <T extends SkriptValue> RuntimeSkriptType<T> getTypeByClass(@NotNull Class<T> clazz) {
+		RuntimeSkriptType<?> type = typesByClass.get(clazz);
 		//noinspection unchecked
-		return type == null ? null : (SkriptValueType<T>) type;
+		return type == null ? null : (RuntimeSkriptType<T>) type;
 	}
 
 	@Override
-	public @NotNull String getNameOfType(@NotNull SkriptValueType<?> type) {
+	public @NotNull String getNameOfType(@NotNull RuntimeSkriptType<?> type) {
 		return typesByName.entrySet().stream()
 			.filter(entry -> entry.getValue() == type)
 			.findFirst()
@@ -60,17 +60,17 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 	}
 
 	@Override
-	public <T extends SkriptValue> @NotNull SkriptValueType<T> addType(@NotNull StagedSkriptValueType<T> type) {
+	public <T extends SkriptValue> @NotNull RuntimeSkriptType<T> addType(@NotNull SkriptType<T> type) {
 		if (lockAccess.isLocked()) throw new IllegalStateException("Cannot add type after runtime is locked");
 		if (typesByName.containsKey(type.typeName())) throw new IllegalArgumentException("Type with name " + type.typeName() + " already exists");
 		if (!typesByName.containsKey(type.superTypeName())) throw new IllegalArgumentException("Super type with name " + type.superTypeName() + " does not exist");
-		SkriptValueType<T> constructedType = type.construct(this);
+		RuntimeSkriptType<T> constructedType = type.construct(this);
 		typesByName.put(type.typeName(), constructedType);
 		typesByClass.put(type.valueClass(), constructedType);
 		return constructedType;
 	}
 
-	private void addConstructedType(String typeName, @NotNull SkriptValueType<?> type) {
+	private void addConstructedType(String typeName, @NotNull RuntimeSkriptType<?> type) {
 		if (typesByName.containsKey(typeName)) throw new IllegalArgumentException("Type with name " + typeName + " already exists");
 		typesByName.put(typeName, type);
 		typesByClass.put(type.valueClass(), type);
@@ -82,7 +82,7 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 	}
 
 	@Override
-	public <TReceiver extends SkriptValue, TValue extends SkriptValue> Variable.@NotNull OfProperty<TReceiver, TValue> wrapProperty(SkriptProperty<TReceiver, TValue> property, TReceiver receiver) {
+	public <TReceiver extends SkriptValue, TValue extends SkriptValue> Variable.@NotNull OfProperty<TReceiver, TValue> wrapProperty(RuntimeSkriptProperty<TReceiver, TValue> property, TReceiver receiver) {
 		return new VariableImpl.OfProperty<>(this, property, receiver);
 	}
 

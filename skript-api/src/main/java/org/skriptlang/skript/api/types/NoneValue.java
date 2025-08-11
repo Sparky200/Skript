@@ -3,9 +3,11 @@ package org.skriptlang.skript.api.types;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 import org.skriptlang.skript.api.types.base.SkriptPropertyBase;
-import org.skriptlang.skript.api.types.base.SkriptValueTypeBase;
+import org.skriptlang.skript.api.types.base.RuntimeSkriptTypeBase;
 
 import java.util.Map;
+
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 /**
  * Represents a {@code <none>} value.
@@ -16,6 +18,14 @@ public final class NoneValue extends SkriptValue {
 	public static final String TYPE_NAME = "none";
 
 	private static final NoneValue INSTANCE = new NoneValue();
+
+	public static final SkriptType<NoneValue> TYPE = skriptType("none", NoneValue.class)
+		// factory ignores supertype properties intentionally
+		.runtimeFactory(
+			(runtime, source, superType, properties) ->
+				new RuntimeType(runtime, source)
+		)
+		.build();
 
 	private NoneValue() {}
 
@@ -30,12 +40,16 @@ public final class NoneValue extends SkriptValue {
 
 	/**
 	 * A Skript value type representing {@code <none>}.
+	 * This is a special type (and should not be used as an example)
+	 * that will always propagate null upon
+	 * getting a property.
 	 */
-	public static final class Type extends SkriptValueTypeBase<NoneValue> {
-		private final SkriptProperty<NoneValue, NoneValue> property = new PropagatingProperty(runtime());
+	private static final class RuntimeType extends RuntimeSkriptTypeBase<NoneValue> {
+		private final RuntimeSkriptProperty<NoneValue, NoneValue> property = new PropagatingProperty(runtime());
 
-		public Type(SkriptRuntime runtime, SkriptValueType<? super NoneValue> superType) {
-			super(runtime, NoneValue.class, superType, Map.of());
+		public RuntimeType(SkriptRuntime runtime, SkriptType<NoneValue> source) {
+			//noinspection unchecked
+			super(source, runtime, NoneValue.class, (RuntimeSkriptType<? super NoneValue>) runtime.getTypeByName(source.superTypeName()), Map.of());
 		}
 
 		@Override
@@ -44,7 +58,7 @@ public final class NoneValue extends SkriptValue {
 		}
 
 		@Override
-		public @NotNull SkriptProperty<NoneValue, ?> getProperty(String name) {
+		public @NotNull RuntimeSkriptProperty<NoneValue, ?> getProperty(String name) {
 			return property;
 		}
 

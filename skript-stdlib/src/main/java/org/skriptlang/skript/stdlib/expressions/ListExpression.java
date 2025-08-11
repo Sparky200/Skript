@@ -12,35 +12,17 @@ import org.skriptlang.skript.api.types.SkriptValueOrVariable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ListExpression implements ExpressionNode<ListValue> {
-	public static final ExpressionNodeType<ListExpression, ListValue> TYPE = new ExpressionNodeType<>() {
-		@Override
-		public Class<ListValue> getReturnType() {
-			return ListValue.class;
-		}
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.expression;
 
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of(
-				"<expr>(,|[,] and) <expr>"
-			);
-		}
+public record ListExpression(ExpressionNode firstSelector, ExpressionNode secondSelector) implements ExpressionNode {
 
-		@Override
-		public @NotNull ListExpression create(List<SyntaxNode> children, int matchedPattern) {
-			ExpressionNode<?> first = (ExpressionNode<?>) children.get(0);
-			ExpressionNode<?> second = (ExpressionNode<?>) children.get(1);
-			return new ListExpression(first, second);
-		}
-	};
-
-	private final ExpressionNode<?> firstSelector;
-	private final ExpressionNode<?> secondSelector;
-
-	public ListExpression(ExpressionNode<?> firstSelector, ExpressionNode<?> secondSelector) {
-		this.firstSelector = firstSelector;
-		this.secondSelector = secondSelector;
-	}
+	public static final ExpressionNodeType<ListExpression> TYPE = expression(ListExpression.class)
+		.syntaxes("<expr>(,|[,] and) <expr>")
+		.possibleReturnTypes(ListValue.TYPE)
+		.create((children, matchedPattern) ->
+			new ListExpression((ExpressionNode) children.getFirst(), (ExpressionNode) children.getLast())
+		)
+		.build();
 
 	@Override
 	public @NotNull ListValue resolve(@NotNull ExecuteContext context) {

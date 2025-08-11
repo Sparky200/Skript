@@ -9,28 +9,13 @@ import org.skriptlang.skript.api.types.SkriptValue;
 import org.skriptlang.skript.api.util.ExecuteResult;
 import org.skriptlang.skript.api.util.SectionUtils;
 
-import java.util.List;
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 
-public class IfEffect implements EffectNode {
-	public static final EffectNodeType<IfEffect> TYPE = new EffectNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("if <expr::-> boolean>:<section>");
-		}
-
-		@Override
-		public @NotNull IfEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new IfEffect((ExpressionNode<?>) children.getFirst(), (SectionNode) children.getLast());
-		}
-	};
-
-	private final ExpressionNode<?> condition;
-	private final SectionNode trigger;
-
-	public IfEffect(ExpressionNode<?> condition, SectionNode trigger) {
-		this.condition = condition;
-		this.trigger = trigger;
-	}
+public record IfEffect(ExpressionNode condition, SectionNode trigger) implements EffectNode {
+	public static final EffectNodeType<IfEffect> TYPE = effect(IfEffect.class)
+		.syntaxes("if <expr::-> boolean>:<section>")
+		.create((children, matchedPattern) -> new IfEffect((ExpressionNode) children.getFirst(), (SectionNode) children.getLast()))
+		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {

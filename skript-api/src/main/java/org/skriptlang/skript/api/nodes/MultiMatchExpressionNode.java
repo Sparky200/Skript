@@ -6,7 +6,7 @@ import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.ListValue;
 import org.skriptlang.skript.api.types.NoneValue;
 import org.skriptlang.skript.api.types.SkriptValueOrVariable;
-import org.skriptlang.skript.api.types.SkriptValueType;
+import org.skriptlang.skript.api.types.RuntimeSkriptType;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,25 +18,25 @@ import java.util.List;
  * Note that this only occurs with syntaxes that are ambiguous until a type is known.
  * In addition, if there's still type ambiguity, the "first" result matching the desired type will be returned.
  */
-public class MultiMatchExpressionNode implements ExpressionNode<SkriptValueOrVariable> {
+public class MultiMatchExpressionNode implements ExpressionNode {
 
-	private final List<? extends ExpressionNode<?>> possibleMatches;
+	private final List<? extends ExpressionNode> possibleMatches;
 
 	/**
 	 * The type name that is desired by the parent.
 	 */
 	private final @NotNull String desiredTypeName;
 
-	public MultiMatchExpressionNode(List<? extends ExpressionNode<?>> possibleMatches, @Nullable String desiredTypeName) {
+	public MultiMatchExpressionNode(List<? extends ExpressionNode> possibleMatches, @Nullable String desiredTypeName) {
 		this.possibleMatches = possibleMatches;
 		this.desiredTypeName = desiredTypeName != null ? desiredTypeName : "any";
 	}
 
-	private List<SkriptValueType<?>> createAllowedTypes(ExecuteContext context, SkriptValueType<?> desiredType) {
-		List<SkriptValueType<?>> allowedTypes = new LinkedList<>();
+	private List<RuntimeSkriptType<?>> createAllowedTypes(ExecuteContext context, RuntimeSkriptType<?> desiredType) {
+		List<RuntimeSkriptType<?>> allowedTypes = new LinkedList<>();
 		// may be a list
 		allowedTypes.add(context.runtime().getTypeByName("list"));
-		SkriptValueType<?> current = desiredType;
+		RuntimeSkriptType<?> current = desiredType;
 
 		while (current != null) {
 			allowedTypes.add(current);
@@ -50,13 +50,13 @@ public class MultiMatchExpressionNode implements ExpressionNode<SkriptValueOrVar
 	public @NotNull SkriptValueOrVariable resolve(@NotNull ExecuteContext context) {
 		// note properties will be preferred over values (will return property if possible)
 
-		SkriptValueType<?> desiredType = context.runtime().getTypeByName(desiredTypeName);
+		RuntimeSkriptType<?> desiredType = context.runtime().getTypeByName(desiredTypeName);
 		if (desiredType == null) throw new IllegalStateException("Desired type not found: " + desiredTypeName);
 
-		List<SkriptValueType<?>> allowedTypes = createAllowedTypes(context, desiredType);
+		List<RuntimeSkriptType<?>> allowedTypes = createAllowedTypes(context, desiredType);
 
 
-		for (ExpressionNode<?> possibleMatch : possibleMatches) {
+		for (ExpressionNode possibleMatch : possibleMatches) {
 			SkriptValueOrVariable resolved = possibleMatch.resolve(context);
 
 			if (!allowedTypes.contains(resolved.toValue().getType(context.runtime()))) {

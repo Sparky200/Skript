@@ -12,26 +12,15 @@ import org.skriptlang.skript.api.util.SectionUtils;
 
 import java.util.List;
 
-public class ElseIfEffect implements EffectNode {
-	public static final EffectNodeType<ElseIfEffect> TYPE = new EffectNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of("else if <expr::-> boolean>:<section>");
-		}
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 
-		@Override
-		public @NotNull ElseIfEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new ElseIfEffect((ExpressionNode<?>) children.getFirst(), (SectionNode) children.getLast());
-		}
-	};
-
-	private final ExpressionNode<?> condition;
-	private final SectionNode trigger;
-
-	public ElseIfEffect(ExpressionNode<?> condition, SectionNode trigger) {
-		this.condition = condition;
-		this.trigger = trigger;
-	}
+public record ElseIfEffect(ExpressionNode condition, SectionNode trigger) implements EffectNode {
+	public static final EffectNodeType<ElseIfEffect> TYPE = effect(ElseIfEffect.class)
+		.syntaxes("else if <expr::-> boolean>:<section>")
+		.create((children, matchedPattern) ->
+			new ElseIfEffect((ExpressionNode) children.getFirst(), (SectionNode) children.getLast())
+		)
+		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {

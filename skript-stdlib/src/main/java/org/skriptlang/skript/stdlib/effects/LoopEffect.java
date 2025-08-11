@@ -6,34 +6,18 @@ import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.ErrorValue;
 import org.skriptlang.skript.api.types.NumberValue;
 import org.skriptlang.skript.api.types.SkriptValue;
-import org.skriptlang.skript.api.types.SkriptValueOrVariable;
 import org.skriptlang.skript.api.util.ExecuteResult;
 import org.skriptlang.skript.api.util.SectionUtils;
 
 import java.util.List;
 
-public class LoopEffect implements EffectNode {
-	public static final EffectNodeType<LoopEffect> TYPE = new EffectNodeType<>() {
-		@Override
-		public List<String> getSyntaxes() {
-			return List.of(
-				"loop <expr> times:<section>"
-			);
-		}
+import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 
-		@Override
-		public @NotNull LoopEffect create(List<SyntaxNode> children, int matchedPattern) {
-			return new LoopEffect((ExpressionNode<?>) children.get(0), (SectionNode) children.get(1));
-		}
-	};
-
-	private final ExpressionNode<?> timesSelector;
-	private final SectionNode trigger;
-
-	public LoopEffect(ExpressionNode<?> timesSelector, SectionNode trigger) {
-		this.timesSelector = timesSelector;
-		this.trigger = trigger;
-	}
+public record LoopEffect(ExpressionNode timesSelector, SectionNode trigger) implements EffectNode {
+	public static final EffectNodeType<LoopEffect> TYPE = effect(LoopEffect.class)
+		.syntaxes("loop <expr> times:<section>")
+		.create((children, matchedPattern) -> new LoopEffect((ExpressionNode) children.getFirst(), (SectionNode) children.get(1)))
+		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {

@@ -9,11 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.skriptlang.skript.api.types.base.SkriptPropertyFactory.skriptProperty;
-import static org.skriptlang.skript.api.types.base.SkriptValueTypeFactory.skriptType;
+import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
 public class ListValue extends IterableValue {
-	public static final StagedSkriptValueType<ListValue> TYPE = skriptType("list", ListValue.class)
-		.superType("iterable")
+	public static final SkriptType<ListValue> TYPE = skriptType("list", ListValue.class)
+		.extend(IterableValue.TYPE)
 		.property("length", skriptProperty(ListValue.class, NumberValue.class)
 			.getter(ListValue::length)
 		)

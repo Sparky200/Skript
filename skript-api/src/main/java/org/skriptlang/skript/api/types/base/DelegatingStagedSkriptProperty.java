@@ -3,9 +3,9 @@ package org.skriptlang.skript.api.types.base;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
-import org.skriptlang.skript.api.types.SkriptProperty;
+import org.skriptlang.skript.api.types.RuntimeSkriptProperty;
 import org.skriptlang.skript.api.types.SkriptValue;
-import org.skriptlang.skript.api.types.StagedSkriptProperty;
+import org.skriptlang.skript.api.types.SkriptProperty;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -13,7 +13,7 @@ import java.util.function.Function;
 /**
  * A staged Skript property that delegates behavior to lambda functions.
  */
-public final class DelegatingStagedSkriptProperty<TReceiver extends SkriptValue, TValue extends SkriptValue> implements StagedSkriptProperty<TReceiver, TValue> {
+public final class DelegatingStagedSkriptProperty<TReceiver extends SkriptValue, TValue extends SkriptValue> implements SkriptProperty<TReceiver, TValue> {
 	private final @NotNull Class<TValue> valueClass;
 	private final @NotNull Function<TReceiver, TValue> getter;
 	private final @Nullable BiFunction<TReceiver, TValue, Boolean> setter;
@@ -41,7 +41,7 @@ public final class DelegatingStagedSkriptProperty<TReceiver extends SkriptValue,
 	}
 
 	@Override
-	public SkriptProperty<TReceiver, TValue> construct(SkriptRuntime runtime) {
+	public RuntimeSkriptProperty<TReceiver, TValue> construct(SkriptRuntime runtime) {
 		return new DelegatingSkriptProperty<>(
 			runtime,
 			valueClass,
