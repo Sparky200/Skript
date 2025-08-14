@@ -16,7 +16,7 @@ public class NoneLiteralExpression implements ExpressionNode {
 	public static final ExpressionNodeType<NoneLiteralExpression> TYPE = expression(NoneLiteralExpression.class)
 		.syntaxes("none")
 		.possibleReturnTypes(NoneValue.TYPE)
-		.create((children, matchedPattern) -> new NoneLiteralExpression())
+		.create(context -> new NoneLiteralExpression())
 		.build();
 
 	@Override

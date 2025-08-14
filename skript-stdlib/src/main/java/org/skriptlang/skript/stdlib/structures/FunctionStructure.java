@@ -27,14 +27,14 @@ public record FunctionStructure(
 
 	public static final StructureNodeType<FunctionStructure> TYPE = structure(FunctionStructure.class)
 		.syntaxes("[local] function <token::identifier>([<expr:: -> parametermeta>]) [returns <token::identifier>] : <section>")
-		.create((children, matchedPattern, entries) -> {
-			String name = ((TokenNode) children.getFirst()).tokenContents();
+		.create(context -> {
+			String name = context.token(0).tokenContents();
 
 			ExpressionNode paramsSelector = null;
 			String returns = SkriptValue.TYPE.typeName();
 			SectionNode body = null;
 
-			for (SyntaxNode child : children) {
+			for (SyntaxNode child : context.children()) {
 				switch (child) {
 					case SectionNode sec -> body = sec;
 					case TokenNode(String tokenContents) -> returns = tokenContents;
@@ -63,7 +63,7 @@ public record FunctionStructure(
 		ExecuteContext functionBaseContext = context.fork();
 		ParameterMetaValue params = paramsSelector != null ? paramsSelector.resolveAs(ParameterMetaValue.class, context) : null;
 		if (paramsSelector != null && params == null)
-			return ExecuteResult.failure(new ErrorValue("Parameters could not be resolved"));
+			return ExecuteResult.failure(new ErrorValue(this, "Parameters could not be resolved"));
 
 		Map<ParameterMetaValue.Parameter, SkriptValue> defaults = new LinkedHashMap<>();
 		if (params != null)
@@ -96,6 +96,8 @@ public record FunctionStructure(
 				if (result != ExecuteResult.SUCCESS) {
 					return result;
 				}
+			} else {
+				return ExecuteResult.failure(new ErrorValue(this, "Only effects are allowed in function body"));
 			}
 		}
 		return ExecuteResult.success();

@@ -53,7 +53,7 @@ public interface RuntimeSkriptProperty<TReceiver extends SkriptValue, TValue ext
 		SkriptValue addedValue = currentValue.add(value);
 		if (addedValue != null) {
 			// make sure added value is still applicable to this property
-			if (!addedValue.getType(runtime()).isSubtypeOf(valueType())) return false;
+			if (!addedValue.getType(runtime().globalContext()).isSubtypeOf(valueType())) return false;
 			//noinspection unchecked
 			return set(receiver, (TValue) addedValue);
 		}
@@ -76,7 +76,7 @@ public interface RuntimeSkriptProperty<TReceiver extends SkriptValue, TValue ext
 		SkriptValue removedValue = currentValue.remove(value);
 		if (removedValue != null) {
 			// make sure removed value is still applicable to this property
-			if (!removedValue.getType(runtime()).isSubtypeOf(valueType())) return false;
+			if (!removedValue.getType(runtime().globalContext()).isSubtypeOf(valueType())) return false;
 			//noinspection unchecked
 			return set(receiver, (TValue) removedValue);
 		}
@@ -102,7 +102,7 @@ public interface RuntimeSkriptProperty<TReceiver extends SkriptValue, TValue ext
 		SkriptValue incrementedValue = currentValue.increment();
 		if (incrementedValue != null) {
 			// make sure incremented value is still applicable to this property
-			if (!incrementedValue.getType(runtime()).isSubtypeOf(valueType())) return false;
+			if (!incrementedValue.getType(runtime().globalContext()).isSubtypeOf(valueType())) return false;
 			//noinspection unchecked
 			return set(receiver, (TValue) incrementedValue);
 		}
@@ -138,7 +138,7 @@ public interface RuntimeSkriptProperty<TReceiver extends SkriptValue, TValue ext
 		if (changeType.requiresValue() && value == null) return false;
 		switch (changeType) {
 			case SET -> {
-				if (Objects.requireNonNull(value).getType(runtime()).isSubtypeOf(valueType())) {
+				if (Objects.requireNonNull(value).getType(runtime().globalContext()).isSubtypeOf(valueType())) {
 					//noinspection unchecked
 					return set(receiver, (TValue) value);
 				}

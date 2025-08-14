@@ -3,6 +3,7 @@ package org.skriptlang.skript.api.nodes;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.ParseContext;
+import org.skriptlang.skript.api.util.NodeCreationContext;
 
 import java.util.List;
 
@@ -18,8 +19,8 @@ public interface SyntaxNodeType<T extends SyntaxNode> {
 	 */
 	List<String> getSyntaxes();
 
-	@Contract(value = "_, _ -> new", pure = true)
-	@NotNull T create(List<SyntaxNode> children, int matchedPattern);
+	@Contract(value = "_ -> new", pure = true)
+	@NotNull T create(NodeCreationContext context);
 
 	/**
 	 * Whether this node type can be parsed in the current context.

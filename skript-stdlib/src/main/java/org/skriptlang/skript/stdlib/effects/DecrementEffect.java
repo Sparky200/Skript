@@ -19,9 +19,9 @@ public record DecrementEffect(@NotNull ExpressionNode receiverSelector,
 							  @Nullable ExpressionNode amountSelector) implements EffectNode {
 	public static final EffectNodeType<DecrementEffect> TYPE = effect(DecrementEffect.class)
 		.syntaxes("decrement <expr> [by <expr>]")
-		.create((children, matchedPattern) -> {
-			ExpressionNode amountSelector = matchedPattern == 0 ? (ExpressionNode) children.get(1) : null;
-			return new DecrementEffect((ExpressionNode) children.getFirst(), amountSelector);
+		.create(context -> {
+			ExpressionNode amountSelector = context.matchedPattern() == 0 ? context.expression(1) : null;
+			return new DecrementEffect(context.expression(0), amountSelector);
 		})
 		.build();
 
@@ -33,7 +33,7 @@ public record DecrementEffect(@NotNull ExpressionNode receiverSelector,
 			amountSelector == null ? null : amountSelector.resolve(context).toValue()
 		)
 			? ExecuteResult.success()
-			: ExecuteResult.failure(new ErrorValue("Failed to decrement value - does it support decrementing?"));
+			: ExecuteResult.failure(new ErrorValue(this, "Failed to decrement value - does it support decrementing?"));
 
 	}
 }

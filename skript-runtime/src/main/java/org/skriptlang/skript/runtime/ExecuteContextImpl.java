@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.nodes.SyntaxNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
+import org.skriptlang.skript.api.runtime.ScriptContext;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 import org.skriptlang.skript.api.script.Script;
 import org.skriptlang.skript.api.types.SkriptValue;
@@ -48,6 +49,11 @@ public class ExecuteContextImpl implements ExecuteContext {
 	@Override
 	public @Nullable Script script() {
 		return parent != null ? parent.script() : null;
+	}
+
+	@Override
+	public @Nullable ScriptContext scriptContext() {
+		return parent != null ? parent.scriptContext() : null;
 	}
 
 	@Override

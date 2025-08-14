@@ -59,7 +59,7 @@ public class MultiMatchExpressionNode implements ExpressionNode {
 		for (ExpressionNode possibleMatch : possibleMatches) {
 			SkriptValueOrVariable resolved = possibleMatch.resolve(context);
 
-			if (!allowedTypes.contains(resolved.toValue().getType(context.runtime()))) {
+			if (!allowedTypes.contains(resolved.toValue().getType(context.runtime().globalContext()))) {
 				continue;
 			}
 

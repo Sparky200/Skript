@@ -16,8 +16,8 @@ public record PropertyExpression(String propertyName, ExpressionNode receiverSel
 
 	public static final ExpressionNodeType<PropertyExpression> TYPE = expression(PropertyExpression.class)
 		.syntaxes("<token::identifier> of <expr>")
-		.create((children, matchedPattern) ->
-			new PropertyExpression(((TokenNode) children.getFirst()).tokenContents(), (ExpressionNode) children.get(1))
+		.create(context ->
+			new PropertyExpression(context.token(0).tokenContents(), context.expression(1))
 		)
 		.build();
 
@@ -35,7 +35,7 @@ public record PropertyExpression(String propertyName, ExpressionNode receiverSel
 		// TODO: need a way to feed an ExecuteResult out of an expression
 		if (receiver == null) throw new IllegalStateException("Cannot get property of a non-variable");
 
-		RuntimeSkriptType<?> type = receiver.getType(context.runtime());
+		RuntimeSkriptType<?> type = receiver.getType(context.runtime().globalContext());
 
 		RuntimeSkriptProperty<?, ?> prop = type.getProperty(propertyName);
 		if (prop == null) {

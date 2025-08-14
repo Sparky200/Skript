@@ -16,8 +16,8 @@ public record BooleanLiteralExpression(boolean value) implements ExpressionNode 
 	public static final ExpressionNodeType<BooleanLiteralExpression> TYPE = expression(BooleanLiteralExpression.class)
 		.syntaxes("true", "false")
 		.possibleReturnTypes(BooleanValue.TYPE)
-		.create((children, matchedPattern) ->
-			new BooleanLiteralExpression(matchedPattern == 0)
+		.create(context ->
+			new BooleanLiteralExpression(context.matchedPattern() == 0)
 		)
 		.build();
 

@@ -3,7 +3,6 @@ package org.skriptlang.skript.stdlib.expressions;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.ExpressionNode;
 import org.skriptlang.skript.api.nodes.ExpressionNodeType;
-import org.skriptlang.skript.api.nodes.TokenNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.NoneValue;
 import org.skriptlang.skript.api.types.SkriptValueOrVariable;
@@ -14,7 +13,7 @@ public record VariableExpression(String name) implements ExpressionNode {
 
 	public static final ExpressionNodeType<VariableExpression> TYPE = expression(VariableExpression.class)
 		.syntaxes("{<token::identifier>}")
-		.create((children, matchedPattern) -> new VariableExpression(((TokenNode) children.getFirst()).tokenContents()))
+		.create(context -> new VariableExpression(context.token(0).tokenContents()))
 		.build();
 
 	@Override

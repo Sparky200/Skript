@@ -3,10 +3,8 @@ package org.skriptlang.skript.api.nodes;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.util.ExecuteResult;
+import org.skriptlang.skript.api.util.NodeCreationContext;
 import org.skriptlang.skript.api.util.Priority;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Structure nodes are nodes that are permitted on the top-level of a script.
@@ -26,7 +24,7 @@ import java.util.Map;
  *         a section.
  *     </li>
  *     <li>
- *         The {@link StructureNodeType#create(List, int, Map)} method is called
+ *         The {@link StructureNodeType#create(NodeCreationContext)} method is called
  *         to create this structure.
  *     </li>
  * </ul>
@@ -41,11 +39,34 @@ import java.util.Map;
  *         to perform any post-load actions.
  *     </li>
  * </ul>
+ * <ul>
+ *     <li>
+ *         The {@link StructureNode#unload(ExecuteContext)} method is called
+ *         to unload the structure, if this script is unloaded from the runtime.
+ *     </li>
+ * </ul>
+ * <p>
+ * <h2>Priority</h2>
+ * Structure nodes are loaded in a certain priority order.
+ * The default priority is {@link #BASE},
+ * and the built-in priority order is:
+ * <ol>
+ *     <li>{@link #STRUCTURE}</li>
+ *     <li>{@link #FUNCTION}</li>
+ *     <li>{@link #BASE}</li>
+ *     <li>{@link #EVENT}</li>
+ * </ol>
+ * If two structures have the same priority, they will be loaded in the order in which they are defined in the script.
+ * For example, if a script contains two structs, the first one will <i>always</i> be loaded before the second one.
+ * <p>
+ * Especially in the case of structs, this causes the requirement where structs that use other structs must be defined
+ * after the structs they use.
  */
 public interface StructureNode extends StatementNode {
 	Priority BASE = Priority.base();
 
 	Priority FUNCTION = Priority.before(BASE);
+	Priority STRUCTURE = Priority.before(FUNCTION);
 	Priority EVENT = Priority.after(BASE);
 
 	default Priority priority() {

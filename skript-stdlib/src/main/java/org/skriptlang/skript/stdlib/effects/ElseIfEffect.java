@@ -17,15 +17,15 @@ import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 public record ElseIfEffect(ExpressionNode condition, SectionNode trigger) implements EffectNode {
 	public static final EffectNodeType<ElseIfEffect> TYPE = effect(ElseIfEffect.class)
 		.syntaxes("else if <expr::-> boolean>:<section>")
-		.create((children, matchedPattern) ->
-			new ElseIfEffect((ExpressionNode) children.getFirst(), (SectionNode) children.getLast())
+		.create(context ->
+			new ElseIfEffect(context.expression(0), context.section(1))
 		)
 		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {
 		if (!context.ifContext())
-			return ExecuteResult.failure(new ErrorValue("else if can only appear preceded by an if statement"));
+			return ExecuteResult.failure(new ErrorValue(this, "else if can only appear preceded by an if statement"));
 		// propagate
 		context.ifContext(2);
 

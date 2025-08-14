@@ -12,7 +12,7 @@ import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 public record BroadcastEffect(ExpressionNode valueSelector) implements EffectNode {
 	public static final EffectNodeType<BroadcastEffect> TYPE = effect(BroadcastEffect.class)
 		.syntaxes("broadcast <expr>")
-		.create((children, unused) -> new BroadcastEffect((ExpressionNode) children.getFirst()))
+		.create(context -> new BroadcastEffect(context.expression(0)))
 		.build();
 
 	@Override

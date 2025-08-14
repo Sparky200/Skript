@@ -3,7 +3,6 @@ package org.skriptlang.skript.stdlib.expressions;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.nodes.ExpressionNode;
 import org.skriptlang.skript.api.nodes.ExpressionNodeType;
-import org.skriptlang.skript.api.nodes.StringNode;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.StringValue;
 
@@ -14,7 +13,7 @@ public record StringLiteralExpression(ExpressionNode stringTokenSelector) implem
 	public static final ExpressionNodeType<StringLiteralExpression> TYPE = expression(StringLiteralExpression.class)
 		.syntaxes("<token::string>")
 		.possibleReturnTypes(StringValue.TYPE)
-		.create((children, matchedPattern) -> new StringLiteralExpression((StringNode) children.getFirst()))
+		.create(context -> new StringLiteralExpression(context.string(0)))
 		.build();
 
 	@Override

@@ -1,19 +1,24 @@
 package org.skriptlang.skript.stdlib;
 
 import org.skriptlang.skript.api.SkriptParser;
+import org.skriptlang.skript.api.runtime.SkriptRuntime;
+import org.skriptlang.skript.api.types.NumberValue;
 import org.skriptlang.skript.stdlib.effects.*;
 import org.skriptlang.skript.stdlib.expressions.*;
 import org.skriptlang.skript.stdlib.structures.CommandStructure;
 import org.skriptlang.skript.stdlib.structures.OnScriptLoadEvent;
+import org.skriptlang.skript.stdlib.structures.StructStructure;
 
 public final class SyntaxManifest {
 	private SyntaxManifest() {
 		// no instance
 	}
 
-	public static void applySyntax(SkriptParser parser) {
+	public static void applySyntax(SkriptParser parser, SkriptRuntime runtime) {
 		parser.submitScope(CommandStructure.SCOPE);
 		parser.submitNode(CommandStructure.TYPE);
+		parser.submitNode(StructStructure.TYPE);
+		parser.submitNode(NewStructExpression.TYPE);
 		parser.submitNode(BroadcastEffect.TYPE);
 		parser.submitNode(StringLiteralExpression.TYPE);
 		parser.submitNode(NumberLiteralExpression.TYPE);
@@ -34,6 +39,8 @@ public final class SyntaxManifest {
 		parser.submitNode(IfEffect.TYPE);
 		parser.submitNode(ElseIfEffect.TYPE);
 		parser.submitNode(ElseEffect.TYPE);
+
+		runtime.addType(NumberValue.TYPE);
 	}
 
 }

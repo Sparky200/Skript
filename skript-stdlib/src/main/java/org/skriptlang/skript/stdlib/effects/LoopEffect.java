@@ -16,7 +16,7 @@ import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 public record LoopEffect(ExpressionNode timesSelector, SectionNode trigger) implements EffectNode {
 	public static final EffectNodeType<LoopEffect> TYPE = effect(LoopEffect.class)
 		.syntaxes("loop <expr> times:<section>")
-		.create((children, matchedPattern) -> new LoopEffect((ExpressionNode) children.getFirst(), (SectionNode) children.get(1)))
+		.create(context -> new LoopEffect(context.expression(0), context.section(1)))
 		.build();
 
 	@Override
@@ -24,7 +24,7 @@ public record LoopEffect(ExpressionNode timesSelector, SectionNode trigger) impl
 		SkriptValue times = timesSelector.resolve(context).toValue();
 
 		if (!(times instanceof NumberValue numberValue))
-			return ExecuteResult.failure(new ErrorValue("Expected a number, but got " + times));
+			return ExecuteResult.failure(new ErrorValue(this, "Expected a number, but got " + times));
 
 		for (int i = 0; i < numberValue.jvmValue(); i++) {
 			ExecuteResult iterResult = SectionUtils.executeSimple(trigger, context);

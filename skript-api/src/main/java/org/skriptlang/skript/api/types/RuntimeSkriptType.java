@@ -47,7 +47,7 @@ public interface RuntimeSkriptType<T extends SkriptValue> {
 	 * @return true if the value is an instance of this type
 	 */
 	default boolean isInstance(SkriptValue value) {
-		return isSupertypeOf(value.getType(runtime()));
+		return isSupertypeOf(value.getType(runtime().globalContext()));
 	}
 
 	/**

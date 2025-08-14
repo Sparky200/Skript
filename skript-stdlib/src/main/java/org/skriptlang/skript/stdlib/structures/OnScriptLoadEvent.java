@@ -24,8 +24,8 @@ public record OnScriptLoadEvent(@NotNull SectionNode section) implements Structu
 
 	public static final StructureNodeType<OnScriptLoadEvent> TYPE = structure(OnScriptLoadEvent.class)
 		.syntaxes("[on] script load:<section::scriptloadevent>")
-		.create((children, matchedPattern, entries) ->
-			new OnScriptLoadEvent((SectionNode) children.getFirst())
+		.create(context ->
+			new OnScriptLoadEvent(context.section(0))
 		)
 		.build();
 

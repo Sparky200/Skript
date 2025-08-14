@@ -15,12 +15,12 @@ public record AddEffect(ExpressionNode valueSelector, ExpressionNode receiverSel
 			"(add|give) <expr> to <expr>",
 			"give <expr> <expr>"
 		)
-		.create(((children, matchedPattern) -> {
-			ExpressionNode receiver = matchedPattern == 0 ? (ExpressionNode) children.get(1) : (ExpressionNode) children.get(0);
-			ExpressionNode value = matchedPattern == 0 ? (ExpressionNode) children.get(0) : (ExpressionNode) children.get(1);
+		.create(context -> {
+			ExpressionNode receiver = context.matchedPattern() == 0 ? context.expression(1) : context.expression(0);
+			ExpressionNode value = context.matchedPattern() == 0 ? context.expression(0) : context.expression(1);
 
 			return new AddEffect(value, receiver);
-		}))
+		})
 		.build();
 
 	@Override
@@ -28,7 +28,7 @@ public record AddEffect(ExpressionNode valueSelector, ExpressionNode receiverSel
 
 		return TypeOperationUtils.applyAdd(receiverSelector.resolve(context), valueSelector.resolve(context).toValue())
 			? ExecuteResult.success()
-			: ExecuteResult.failure(new ErrorValue("Failed to add value to receiver - does it support adding?"));
+			: ExecuteResult.failure(new ErrorValue(this, "Failed to add value to receiver - does it support adding?"));
 
 	}
 }

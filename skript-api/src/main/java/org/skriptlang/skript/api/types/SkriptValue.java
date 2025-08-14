@@ -1,7 +1,11 @@
 package org.skriptlang.skript.api.types;
 
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
+import org.skriptlang.skript.api.runtime.TypeContainer;
+
+import java.util.Objects;
 
 import static org.skriptlang.skript.api.types.base.SkriptTypeFactory.skriptType;
 
@@ -17,12 +21,14 @@ public class SkriptValue implements SkriptValueOrVariable {
 
 	/**
 	 * Gets the type of this value in the current runtime.
+	 * StructValue overrides this behavior, and all other inheritors of SkriptValue (that do not override this method)
+	 * will only check the runtime for types. This is because the script context does not hold types by class.
 	 *
-	 * @param runtime the runtime that stores type information.
+	 * @param context the current context, which will be used to get either the script context or the runtime context.
 	 * @return the type of this value
 	 */
-	public final RuntimeSkriptType<?> getType(SkriptRuntime runtime) {
-		return runtime.typeOf(this);
+	public RuntimeSkriptType<?> getType(ExecuteContext context) {
+		return context.runtime().typeOf(this);
 	}
 
 	/**

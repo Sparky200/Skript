@@ -17,8 +17,8 @@ import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 public record SetEffect(ExpressionNode receiverSelector, ExpressionNode valueSelector) implements EffectNode {
 	public static final EffectNodeType<SetEffect> TYPE = effect(SetEffect.class)
 		.syntaxes("set <expr> to <expr>")
-		.create((children, matchedPattern) ->
-			new SetEffect((ExpressionNode) children.getFirst(), (ExpressionNode) children.getLast())
+		.create(context ->
+			new SetEffect(context.expression(0), context.expression(1))
 		)
 		.build();
 
@@ -33,13 +33,13 @@ public record SetEffect(ExpressionNode receiverSelector, ExpressionNode valueSel
 				// since it's the set effect, we just create a new variable.
 				variable = context.setVariable(name);
 			} else {
-				return ExecuteResult.failure(new ErrorValue("Cannot set <none> to a value"));
+				return ExecuteResult.failure(new ErrorValue(this, "Cannot set <none> to a value"));
 			}
 		} else if (receiver instanceof Variable v) {
 			variable = v;
 		}
 
-		if (variable == null) return ExecuteResult.failure(new ErrorValue("Cannot set a value to a non-variable"));
+		if (variable == null) return ExecuteResult.failure(new ErrorValue(this, "Cannot set a value to a non-variable"));
 
 		SkriptValue value = valueSelector.resolve(context).toValue();
 

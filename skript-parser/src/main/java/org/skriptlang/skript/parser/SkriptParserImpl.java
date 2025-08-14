@@ -1,6 +1,7 @@
 package org.skriptlang.skript.parser;
 
 import com.google.common.base.Preconditions;
+import org.graalvm.collections.Pair;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,12 +13,17 @@ import org.skriptlang.skript.api.scope.InputDefinition;
 import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.util.LockAccess;
+import org.skriptlang.skript.api.util.NodeCreationContext;
 import org.skriptlang.skript.api.util.ResultWithDiagnostics;
 import org.skriptlang.skript.api.util.ScriptDiagnostic;
+import org.skriptlang.skript.parser.context.NodeCreationContextBase;
+import org.skriptlang.skript.parser.context.ParseContextImpl;
+import org.skriptlang.skript.parser.context.StructureNodeCreationContextBase;
 import org.skriptlang.skript.parser.pattern.SyntaxPatternElement;
 import org.skriptlang.skript.parser.tokens.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -295,12 +301,34 @@ public final class SkriptParserImpl implements SkriptParser {
 			tokenIndex += match.length();
 		}
 
-		if (tokenIndex != tokens.size() && !hasSection(candidate)) {
-			context.error("Failed to parse all tokens", tokens.get(tokenIndex).start());
-			return null;
+//		if (tokenIndex != tokens.size() && !hasSection(candidate)) {
+//			context.error("Failed to parse all tokens", tokens.get(tokenIndex).start());
+//			return null;
+//		}
+
+		SyntaxNodeType<?> nodeType = candidate.nodeType();
+		NodeCreationContext creationContext;
+		if (
+			nodeType instanceof StructureNodeType<?>
+		) {
+			StructureEntryNode[] entries;
+			if (!children.isEmpty() && children.getLast() instanceof StructureSectionNode(StructureEntryNode[] entries1))
+				entries = entries1;
+			else entries = new StructureEntryNode[0];
+
+			creationContext = new StructureNodeCreationContextBase(
+				children.toArray(SyntaxNode[]::new),
+				candidate.patternIndex(),
+				entries
+			);
+		} else {
+			creationContext = new NodeCreationContextBase(
+				children.toArray(SyntaxNode[]::new),
+				candidate.patternIndex()
+			);
 		}
 
-		return new Match<>(candidate.nodeType().create(children, candidate.patternIndex()), tokenIndex);
+		return new Match<>(nodeType.create(creationContext), tokenIndex);
 	}
 
 	private int findEnd(
@@ -371,7 +399,6 @@ public final class SkriptParserImpl implements SkriptParser {
 				match = parseExpression(context, tokens, childElement.output());
 			}
 			case "token" -> {
-				if (tokens.size() != 1) break;
 				Token token = tokens.getFirst();
 				if (token.type() != TokenType.fromName(childElement.output())) break;
 
@@ -440,15 +467,20 @@ public final class SkriptParserImpl implements SkriptParser {
 	) {
 		if (structure == null) return null;
 
-		Map<String, StructureEntryNode> entries = new LinkedHashMap<>();
-		Map<String, EntryDefinition> used = new LinkedHashMap<>();
-		Map<String, EntryDefinition> unused = new LinkedHashMap<>();
+		List<StructureEntryNode> entries = new LinkedList<>();
+		Map<String, EntryDefinition.Structured> used = new LinkedHashMap<>();
+		Map<String, EntryDefinition.Structured> unused = new LinkedHashMap<>();
+		List<EntryDefinition> allDefinitions = new LinkedList<>();
 
-		structure.entries().forEach(it -> unused.put(it.name(), it));
+		structure.entries().forEach(it -> {
+			if (it instanceof EntryDefinition.Structured structured)
+				unused.put(structured.name(), structured);
+			allDefinitions.add(it);
+		});
 
 		context.pushSection(tokens.getFirst(), null);
 		context.pushSyntaxFrame(
-			unused.values().stream()
+			allDefinitions.stream()
 				.map(StructureEntryNodeType::of)
 				// syntax allowed to use all features
 				.flatMap(nodeType -> {
@@ -462,12 +494,24 @@ public final class SkriptParserImpl implements SkriptParser {
 				.toArray(TokenizedSyntax[]::new)
 		);
 
+		// initial sanity check on possible starting indent
+		if (
+			tokens.getFirst().type() == TokenType.WHITESPACE &&
+			tokens.getFirst().asString().substring(tokens.getFirst().asString().lastIndexOf('\n') + 1).length() != context.currentSection().getIndent()
+		) {
+			context.popSection();
+			return new Match<>(new StructureSectionNode(new StructureEntryNode[0]), 0);
+		}
+
 		// start after whitespace
 		int index = 1;
 
+
 		Token whitespace;
 		do {
+			while (index < tokens.size() && tokens.get(index).type() == TokenType.WHITESPACE) index++;
 			if (index >= tokens.size()) break;
+
 			Match<StructureEntryNode> next = parseEntry(context, tokens.subList(index, tokens.size()), unused);
 			if (next == null) {
 				context.info("Fail occurred in section depth " + context.depth(), tokens.get(index).start());
@@ -475,16 +519,18 @@ public final class SkriptParserImpl implements SkriptParser {
 				return null;
 			}
 			index += next.length();
-			entries.put(next.node().name(), next.node());
+			entries.add(next.node());
 			EntryDefinition def = unused.remove(next.node().name());
-			used.put(next.node().name(), def);
+			if (def instanceof EntryDefinition.Structured structured) {
+				used.put(next.node().name(), structured);
+			}
 
 			if (index >= tokens.size()) break;
 			whitespace = tokens.get(index);
 			// statement might have consumed the whitespace
 			if (whitespace.type() != TokenType.WHITESPACE) whitespace = tokens.get(--index);
 			if (whitespace.type() != TokenType.WHITESPACE || !whitespace.asString().contains("\n")) {
-				context.error("Expected newline after effect", tokens.get(index).start());
+				context.error("Expected newline after entry", tokens.get(index).start());
 				context.popSection();
 				context.popSyntaxFrame();
 				return null;
@@ -495,23 +541,23 @@ public final class SkriptParserImpl implements SkriptParser {
 		context.popSyntaxFrame();
 		context.popSection();
 
-		if (unused.values().stream().anyMatch(entry -> !entry.optional())) {
+		if (unused.values().stream().anyMatch(entry -> entry instanceof EntryDefinition.Structured structured && !structured.optional())) {
 			context.error("Missing required entries: " + unused.values().stream()
-					.filter(entry -> !entry.optional())
-					.map(EntryDefinition::name)
+					.filter(entry -> entry instanceof EntryDefinition.Structured structured && !structured.optional())
+					.map(EntryDefinition.Structured::name)
 					.toList(),
 				tokens.get(index).start()
 			);
 			return null;
 		}
 
-		return new Match<>(new StructureSectionNode(entries), tokens.size());
+		return new Match<>(new StructureSectionNode(entries.toArray(StructureEntryNode[]::new)), index);
 	}
 
 	private Match<StructureEntryNode> parseEntry(
 		@NotNull ParseContextImpl context,
 		@NotNull List<Token> tokens,
-		@NotNull Map<String, EntryDefinition> unused
+		@NotNull Map<String, EntryDefinition.Structured> unused
 	) {
 		TokenizedSyntax[] candidates = findCandidates(context, tokens, StructureEntryNodeType.class).toArray(TokenizedSyntax[]::new);
 
@@ -520,26 +566,39 @@ public final class SkriptParserImpl implements SkriptParser {
 			return null;
 		}
 
+		// TODO: definition.validate(...) behavior may be interesting
+		// prioritize Structured instances
 		return Arrays.stream(candidates)
-			.map(candidate -> parseCandidate(context, candidate, hasSection(candidate) ? tokens : tokens.subList(0, tokens.size() - 1)))
+			.map(candidate -> {
+				var result = parseCandidate(context, candidate, hasSection(candidate) ? tokens : tokens.subList(0, tokens.size() - 1));
+				if (result == null) return null;
+				if (!(candidate.nodeType() instanceof StructureEntryNodeType type)) return null;
+				// this cast is here due to a possible issue with IDEA code analyzer...
+				// compiles, but IDEA sometimes, at random, reports incorrect compile errors in this pipeline.
+				//noinspection RedundantCast
+				return (Pair<StructureEntryNodeType, Match<SyntaxNode>>) Pair.create(type, result);
+			})
 			.filter(Objects::nonNull)
 			.map(node -> {
-				if (node.node() instanceof StructureEntryNode entryNode)
-					return new Match<>(entryNode, node.length());
+				if (node.getRight().node() instanceof StructureEntryNode entryNode)
+					return Pair.create(node.getLeft(), new Match<>(entryNode, node.getRight().length()));
 				return null;
 			})
 			.filter(Objects::nonNull)
-			.filter(match -> {
-				EntryDefinition definition = unused.get(match.node().name());
-				if (definition == null) {
-					context.error("Entry " + match.node().name() + " is not allowed", tokens.getFirst().start());
-					return false;
+			.min((a, b) -> {
+				EntryDefinition leftDef = a.getLeft().definition();
+				EntryDefinition rightDef = b.getLeft().definition();
+				// prioritize Structured instances
+				boolean leftIsStructured = leftDef instanceof EntryDefinition.Structured;
+				boolean rightIsStructured = rightDef instanceof EntryDefinition.Structured;
+
+				if (leftIsStructured && !rightIsStructured) {
+					return -1;
+				} else if (!leftIsStructured && rightIsStructured) {
+					return 1;
 				}
-				// TODO: definition.validate(...) behavior may be interesting
-				return true;
-			})
-			.findFirst()
-			.orElse(null);
+				return 0;
+			}).map(Pair::getRight).orElse(null);
 	}
 
 	private void pushInputs(@NotNull ParseContextImpl parseContextImpl, List<InputDefinition> inputs) {

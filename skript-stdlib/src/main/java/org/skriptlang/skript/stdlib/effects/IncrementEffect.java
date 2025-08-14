@@ -19,9 +19,9 @@ public record IncrementEffect(
 
 	public static final EffectNodeType<IncrementEffect> TYPE = effect(IncrementEffect.class)
 		.syntaxes("increment <expr> [by <expr>]")
-		.create((children, matchedPattern) -> {
-			ExpressionNode amountSelector = matchedPattern == 0 ? (ExpressionNode) children.get(1) : null;
-			return new IncrementEffect((ExpressionNode) children.getFirst(), amountSelector);
+		.create(context -> {
+			ExpressionNode amountSelector = context.children().length > 1 ? context.expression(1) : null;
+			return new IncrementEffect(context.expression(0), amountSelector);
 		})
 		.build();
 
@@ -30,7 +30,7 @@ public record IncrementEffect(
 
 		return TypeOperationUtils.applyIncrement(receiverSelector.resolve(context), amountSelector == null ? null : amountSelector.resolve(context).toValue())
 			? ExecuteResult.success()
-			: ExecuteResult.failure(new ErrorValue("Failed to increment value - does it support incrementing?"));
+			: ExecuteResult.failure(new ErrorValue(this, "Failed to increment value - does it support incrementing?"));
 
 	}
 }
