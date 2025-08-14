@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
 import org.skriptlang.skript.api.types.Variable;
+import org.skriptlang.skript.api.util.NodeCreationContext;
 
 import java.util.List;
 import java.util.Objects;
@@ -31,7 +32,7 @@ public record InputNode(@NotNull String inputName) implements ExpressionNode {
 		}
 
 		@Override
-		public @NotNull InputNode create(List<SyntaxNode> children, int matchedPattern) {
+		public @NotNull InputNode create(NodeCreationContext context) {
 			return new InputNode(inputName);
 		}
 	}

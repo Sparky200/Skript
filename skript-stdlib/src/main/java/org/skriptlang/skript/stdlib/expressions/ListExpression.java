@@ -19,8 +19,8 @@ public record ListExpression(ExpressionNode firstSelector, ExpressionNode second
 	public static final ExpressionNodeType<ListExpression> TYPE = expression(ListExpression.class)
 		.syntaxes("<expr>(,|[,] and) <expr>")
 		.possibleReturnTypes(ListValue.TYPE)
-		.create((children, matchedPattern) ->
-			new ListExpression((ExpressionNode) children.getFirst(), (ExpressionNode) children.getLast())
+		.create(context ->
+			new ListExpression(context.expression(0), context.expression(1))
 		)
 		.build();
 

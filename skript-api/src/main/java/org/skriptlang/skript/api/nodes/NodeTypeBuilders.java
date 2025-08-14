@@ -4,8 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.ParseContext;
 import org.skriptlang.skript.api.entries.EntryStructureDefinition;
-import org.skriptlang.skript.api.entries.StructureEntryNode;
 import org.skriptlang.skript.api.types.SkriptType;
+import org.skriptlang.skript.api.util.NodeCreationContext;
+import org.skriptlang.skript.api.util.StructureNodeCreationContext;
 
 import java.util.*;
 
@@ -24,7 +25,7 @@ public class NodeTypeBuilders {
 	 */
 	@FunctionalInterface
 	public interface CreateFunction<T> {
-		T create(List<SyntaxNode> children, int matchedPattern);
+		T create(NodeCreationContext context);
 	}
 
 	/**
@@ -42,7 +43,7 @@ public class NodeTypeBuilders {
 	 */
 	@FunctionalInterface
 	public interface StructureCreateFunction<T> {
-		T create(List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries);
+		T create(StructureNodeCreationContext context);
 	}
 
 	/**
@@ -222,6 +223,7 @@ public class NodeTypeBuilders {
 		public ExpressionNodeType<T> build() {
 			final List<String> syntaxesCopy = snapshotSyntaxes();
 			final CreateFunction<T> createFnLocal = this.createFn;
+			if (createFnLocal == null) throw new IllegalStateException("Create function not set for expression node type");
 			final ParsePredicateFunction predicateLocal = snapshotPredicate();
 			final SyntaxNodeType<?>[] allowedParentsLocal = snapshotAllowedParents();
 			final String[] possibleReturnTypesLocal = this.possibleReturnTypes;
@@ -231,9 +233,8 @@ public class NodeTypeBuilders {
 				public List<String> getSyntaxes() { return syntaxesCopy; }
 
 				@Override
-				public @NotNull T create(List<SyntaxNode> children, int matchedPattern) {
-					if (createFnLocal == null) throw new IllegalStateException("Create function not set for expression node type");
-					return createFnLocal.create(children, matchedPattern);
+				public @NotNull T create(NodeCreationContext context) {
+					return createFnLocal.create(context);
 				}
 
 				@Override
@@ -277,6 +278,7 @@ public class NodeTypeBuilders {
 		public EffectNodeType<T> build() {
 			final List<String> syntaxesCopy = snapshotSyntaxes();
 			final CreateFunction<T> createFnLocal = this.createFn;
+			if (createFnLocal == null) throw new IllegalStateException("Create function not set for effect node type");
 			final ParsePredicateFunction predicateLocal = snapshotPredicate();
 			final SyntaxNodeType<?>[] allowedParentsLocal = snapshotAllowedParents();
 			return new EffectNodeType<>() {
@@ -284,9 +286,8 @@ public class NodeTypeBuilders {
 				public List<String> getSyntaxes() { return syntaxesCopy; }
 
 				@Override
-				public @NotNull T create(List<SyntaxNode> children, int matchedPattern) {
-					if (createFnLocal == null) throw new IllegalStateException("Create function not set for effect node type");
-					return createFnLocal.create(children, matchedPattern);
+				public @NotNull T create(NodeCreationContext context) {
+					return createFnLocal.create(context);
 				}
 
 				@Override
@@ -324,6 +325,7 @@ public class NodeTypeBuilders {
 			final List<String> syntaxesCopy = snapshotSyntaxes();
 			final EntryStructureDefinition structureDefLocal = this.structureDef;
 			final StructureCreateFunction<T> createFnLocal = this.createFn;
+			if (createFnLocal == null) throw new IllegalStateException("Create function not set for structure node type");
 			final ParsePredicateFunction predicateLocal = snapshotPredicate();
 			final SyntaxNodeType<?>[] allowedParentsLocal = snapshotAllowedParents();
 			return new StructureNodeType<>() {
@@ -334,9 +336,8 @@ public class NodeTypeBuilders {
 				public @Nullable EntryStructureDefinition structure() { return structureDefLocal; }
 
 				@Override
-				protected @NotNull T create(@NotNull List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries) {
-					if (createFnLocal == null) throw new IllegalStateException("Create function not set for structure node type");
-					return createFnLocal.create(children, matchedPattern, entries);
+				protected @NotNull T create(StructureNodeCreationContext context) {
+					return createFnLocal.create(context);
 				}
 
 				@Override

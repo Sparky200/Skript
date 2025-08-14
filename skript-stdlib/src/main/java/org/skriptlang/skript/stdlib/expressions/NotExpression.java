@@ -15,7 +15,7 @@ public record NotExpression(ExpressionNode rhsSelector) implements ExpressionNod
 	public static final ExpressionNodeType<NotExpression> TYPE = expression(NotExpression.class)
 		.syntaxes("not <expr::-> boolean>")
 		.possibleReturnTypes(BooleanValue.TYPE)
-		.create((children, matchedPattern) -> new NotExpression((ExpressionNode) children.getFirst()))
+		.create(context -> new NotExpression(context.expression(0)))
 		.build();
 
 	@Override

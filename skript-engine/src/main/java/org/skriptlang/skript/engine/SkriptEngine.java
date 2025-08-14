@@ -2,13 +2,16 @@ package org.skriptlang.skript.engine;
 
 import org.skriptlang.skript.api.SkriptParser;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
+import org.skriptlang.skript.api.runtime.ScriptContext;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.util.LockAccess;
+import org.skriptlang.skript.api.util.ResultWithDiagnostics;
 import org.skriptlang.skript.parser.SkriptParserImpl;
 import org.skriptlang.skript.runtime.ScriptImpl;
 import org.skriptlang.skript.runtime.SkriptRuntimeImpl;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -28,13 +31,13 @@ public class SkriptEngine {
 	 * before locking the system for execution.
 	 * @param tempRegistrar a registrar that submits node types and scopes to the parser
 	 */
-	public SkriptEngine(Consumer<SkriptParser> tempRegistrar) {
+	public SkriptEngine(BiConsumer<SkriptParser, SkriptRuntime> tempRegistrar) {
 		LockAccess stubLockAccess = new LockAccess();
 
 		this.addonStubParser = new SkriptParserImpl(stubLockAccess);
 
 		stubLockAccess.lock();
-		tempRegistrar.accept(this.parser);
+		tempRegistrar.accept(this.parser, this.runtime);
 		lockAccess.lock();
 	}
 
@@ -43,9 +46,9 @@ public class SkriptEngine {
 	 * an ExecuteContext if loading succeeds, or {@code null} if loading fails.
 	 * Parsing failures result in an exception.
 	 */
-	public ExecuteContext eval(ScriptSource source) {
+	public ResultWithDiagnostics<ScriptContext> eval(ScriptSource source) {
 		var parseResult = parser.parse(source);
-		if (!parseResult.isSuccess()) throw new RuntimeException("Failed to parse script");
+		if (!parseResult.isSuccess()) return ResultWithDiagnostics.failure(parseResult.getDiagnostics());
 
 		var script = new ScriptImpl(source, parseResult.get());
 		return runtime.load(script);

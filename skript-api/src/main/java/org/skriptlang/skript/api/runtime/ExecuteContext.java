@@ -69,6 +69,12 @@ public interface ExecuteContext {
 	@Nullable Script script();
 
 	/**
+	 * Gets the context belonging to the current script.
+	 * @return the script context, or null if there is no script context
+	 */
+	@Nullable ScriptContext scriptContext();
+
+	/**
 	 * Gets the parent context of this context.
 	 * May be null if this context is the root context.
 	 */

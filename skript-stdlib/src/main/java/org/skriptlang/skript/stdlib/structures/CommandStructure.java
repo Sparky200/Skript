@@ -22,7 +22,7 @@ import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.structure;
 public record CommandStructure(
 	@NotNull String name,
 	SectionNode trigger,
-	@NotNull StringNode description,
+	@Nullable StringNode description,
 	@Nullable StringNode prefix
 ) implements StructureNode {
 
@@ -39,21 +39,17 @@ public record CommandStructure(
 			.entry("prefix", "prefix:<token::string>", true)
 			.build()
 		)
-		.create((children, matchedPattern, entries) -> {
-			Preconditions.checkNotNull(entries, "Commands contractually expect entries");
+		.create(context -> {
+			String name = (context.token(0)).tokenContents();
 
-			String name = ((TokenNode) children.getFirst()).tokenContents();
+			StructureEntryNode trigger = context.entryOrThrow("trigger");
 
-			StructureEntryNode trigger = entries.get("trigger");
-			if (trigger == null) {
-				throw new IllegalStateException("No trigger entry found");
-			}
 			SectionNode triggerSection = (SectionNode) trigger.children().getFirst();
 
-			StructureEntryNode descriptionNode = entries.get("description");
+			StructureEntryNode descriptionNode = context.entry("description");
 			StringNode description = descriptionNode == null ? null : (StringNode) descriptionNode.children().getFirst();
 
-			StructureEntryNode prefixNode = entries.get("prefix");
+			StructureEntryNode prefixNode = context.entry("prefix");
 			StringNode prefix = prefixNode == null ? null : (StringNode) prefixNode.children().getFirst();
 
 			return new CommandStructure(
@@ -101,7 +97,7 @@ public record CommandStructure(
 	private @NotNull ExecuteResult executeCommand(@NotNull ExecuteContext context, @NotNull Object event) {
 		ExecuteContext baseTriggerContext = context.getScriptData(this, ExecuteContext.class);
 		if (baseTriggerContext == null) {
-			return ExecuteResult.failure(new ErrorValue("Command cannot be executed because it previously failed to load"));
+			return ExecuteResult.failure(new ErrorValue(this, "Command cannot be executed because it previously failed to load"));
 		}
 		ExecuteContext thisTrigger = baseTriggerContext.fork();
 

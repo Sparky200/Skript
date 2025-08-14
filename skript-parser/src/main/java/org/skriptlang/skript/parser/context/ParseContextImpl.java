@@ -1,4 +1,4 @@
-package org.skriptlang.skript.parser;
+package org.skriptlang.skript.parser.context;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -6,6 +6,7 @@ import org.skriptlang.skript.api.ParseContext;
 import org.skriptlang.skript.api.scope.SectionScope;
 import org.skriptlang.skript.api.script.ScriptSource;
 import org.skriptlang.skript.api.util.ScriptDiagnostic;
+import org.skriptlang.skript.parser.TokenizedSyntax;
 import org.skriptlang.skript.parser.tokens.Token;
 import org.skriptlang.skript.parser.tokens.TokenType;
 

@@ -3,12 +3,11 @@ package org.skriptlang.skript.runtime;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.runtime.ExecuteContext;
+import org.skriptlang.skript.api.runtime.ScriptContext;
 import org.skriptlang.skript.api.runtime.SkriptRuntime;
 import org.skriptlang.skript.api.script.Script;
 import org.skriptlang.skript.api.types.*;
-import org.skriptlang.skript.api.util.ExecuteResult;
-import org.skriptlang.skript.api.util.LockAccess;
-import org.skriptlang.skript.api.util.SectionUtils;
+import org.skriptlang.skript.api.util.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +27,7 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 		this.lockAccess = lockAccess;
 		addConstructedType(SkriptValue.TYPE.typeName(), SkriptValue.TYPE.construct(this));
 		addConstructedType(NoneValue.TYPE.typeName(), NoneValue.TYPE.construct(this));
+		addType(BooleanValue.TYPE);
 	}
 
 	/**
@@ -66,7 +66,8 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 		if (!typesByName.containsKey(type.superTypeName())) throw new IllegalArgumentException("Super type with name " + type.superTypeName() + " does not exist");
 		RuntimeSkriptType<T> constructedType = type.construct(this);
 		typesByName.put(type.typeName(), constructedType);
-		typesByClass.put(type.valueClass(), constructedType);
+		if (!(constructedType instanceof StructValue.StructType))
+			typesByClass.put(type.valueClass(), constructedType);
 		return constructedType;
 	}
 
@@ -87,14 +88,14 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 	}
 
 	@Override
-	public @Nullable ExecuteContext load(@NotNull Script script) {
+	public @NotNull ResultWithDiagnostics<ScriptContext> load(@NotNull Script script) {
 		synchronized (loadingScripts) {
 			if (loadingScripts.contains(script)) throw new IllegalStateException("Script is already being loaded");
 			if (loadedScripts.containsKey(script)) throw new IllegalStateException("Script is already loaded");
 			loadingScripts.add(script);
 		}
 
-		ExecuteContext scriptContext = new ScriptContext(this, script, globalContext());
+		ScriptContext scriptContext = new ScriptContextImpl(this, script, globalContext());
 
 		ExecuteResult result = SectionUtils.loadStructuresIn(script.root(), scriptContext);
 
@@ -103,8 +104,10 @@ public class SkriptRuntimeImpl implements SkriptRuntime {
 			loadingScripts.remove(script);
 		}
 
-		if (result instanceof ExecuteResult.Failure) return null;
-		return scriptContext;
+		if (result instanceof ExecuteResult.Failure(
+			ErrorValue reason
+		)) return ResultWithDiagnostics.failure(ScriptDiagnostic.error(script.source(), reason.message().toString()));
+		return ResultWithDiagnostics.success(scriptContext);
 	}
 
 	@Override

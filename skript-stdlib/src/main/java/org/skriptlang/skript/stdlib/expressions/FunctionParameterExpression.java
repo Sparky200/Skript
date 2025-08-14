@@ -29,12 +29,12 @@ public record FunctionParameterExpression(
 		.allowedParents(FunctionStructure.TYPE)
 		.allowSelfAsParent()
 		.possibleReturnTypes(ParameterMetaValue.TYPE)
-		.create((children, matchedPattern) -> {
-			TokenNode name = (TokenNode) children.getFirst();
-			TokenNode type = (TokenNode) children.get(1);
+		.create(context -> {
+			TokenNode name = context.token(0);
+			TokenNode type = context.token(1);
 
-			@Nullable ExpressionNode defaultSelector = matchedPattern == 1 ? (ExpressionNode) children.get(2) : null;
-			ExpressionNode additionalSelector = matchedPattern == 1 ? (ExpressionNode) children.get(3) : (ExpressionNode) children.get(2);
+			@Nullable ExpressionNode defaultSelector = context.matchedPattern() == 1 ? context.expression(2) : null;
+			ExpressionNode additionalSelector = context.expression(2 + context.matchedPattern());
 
 			return new FunctionParameterExpression(name, type, defaultSelector, additionalSelector);
 		})

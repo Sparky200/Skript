@@ -58,7 +58,7 @@ public final class SectionUtils {
 			.map(node -> node instanceof StructureNode ? (StructureNode) node : null)
 			.toList();
 
-		if (structures.contains(null)) ExecuteResult.failure(new ErrorValue("Section contains non-structure nodes"));
+		if (structures.contains(null)) ExecuteResult.failure(new ErrorValue(section, "Section contains non-structure nodes"));
 
 		List<StructureNode> sortedStructures = structures.stream()
 			.sorted(Comparator.comparing(StructureNode::priority))

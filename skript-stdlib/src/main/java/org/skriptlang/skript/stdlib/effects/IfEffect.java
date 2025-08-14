@@ -14,7 +14,7 @@ import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 public record IfEffect(ExpressionNode condition, SectionNode trigger) implements EffectNode {
 	public static final EffectNodeType<IfEffect> TYPE = effect(IfEffect.class)
 		.syntaxes("if <expr::-> boolean>:<section>")
-		.create((children, matchedPattern) -> new IfEffect((ExpressionNode) children.getFirst(), (SectionNode) children.getLast()))
+		.create(context -> new IfEffect(context.expression(0), context.section(1)))
 		.build();
 
 	@Override

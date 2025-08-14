@@ -31,7 +31,7 @@ public sealed abstract class VariableImpl implements Variable permits VariableIm
 
 		@Override
 		public boolean set(SkriptValue value) {
-			if (!value.getType(runtime()).isSubtypeOf(valueType())) return false;
+			if (!value.getType(runtime().globalContext()).isSubtypeOf(valueType())) return false;
 			//noinspection unchecked
 			return property.set(receiver, (TValue) value);
 		}
@@ -102,7 +102,7 @@ public sealed abstract class VariableImpl implements Variable permits VariableIm
 
 		@Override
 		public RuntimeSkriptType<?> valueType() {
-			return value.getType(runtime());
+			return value.getType(runtime().globalContext());
 		}
 	}
 }

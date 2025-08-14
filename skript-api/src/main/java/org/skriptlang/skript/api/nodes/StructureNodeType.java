@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.api.entries.EntryStructureDefinition;
 import org.skriptlang.skript.api.entries.StructureEntryNode;
 import org.skriptlang.skript.api.entries.StructureSectionNode;
+import org.skriptlang.skript.api.util.NodeCreationContext;
+import org.skriptlang.skript.api.util.StructureNodeCreationContext;
 
 import java.util.List;
 import java.util.Map;
@@ -17,20 +19,18 @@ public abstract class StructureNodeType<T extends StructureNode> implements Stat
 	}
 
 	@Override
-	@Contract(value = "_, _ -> new", pure = true)
-	public final @NotNull T create(@NotNull List<SyntaxNode> children, int matchedPattern) {
-		SyntaxNode last = children.getLast();
-		if (last instanceof StructureSectionNode(Map<String, StructureEntryNode> entries)) {
-			return create(children, matchedPattern, entries);
+	@Contract(value = "_ -> new", pure = true)
+	public final @NotNull T create(NodeCreationContext context) {
+		if (context instanceof StructureNodeCreationContext structureContext) {
+			return create(structureContext);
 		}
-		return create(children, matchedPattern, null);
+		throw new IllegalArgumentException("Cannot create a structure node from a " + context.getClass().getSimpleName());
 	}
 
 	/**
 	 * Creates a new structure node.
-	 * @param children the children of the node, where the last child is either a section or an entry section.
-	 * @param entries the entries in the node, if this node uses entries.
+	 * @param context The creation context containing children, pattern index, and entries.
 	 * @return the new node.
 	 */
-	protected abstract @NotNull T create(@NotNull List<SyntaxNode> children, int matchedPattern, @Nullable Map<String, StructureEntryNode> entries);
+	protected abstract @NotNull T create(StructureNodeCreationContext context);
 }

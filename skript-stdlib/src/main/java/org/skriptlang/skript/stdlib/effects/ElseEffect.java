@@ -17,13 +17,13 @@ import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 public record ElseEffect(SectionNode trigger) implements EffectNode {
 	public static final EffectNodeType<ElseEffect> TYPE = effect(ElseEffect.class)
 		.syntaxes("else:<section>")
-		.create((children, matchedPattern) -> new ElseEffect((SectionNode) children.getFirst()))
+		.create(context -> new ElseEffect(context.section(0)))
 		.build();
 
 	@Override
 	public @NotNull ExecuteResult execute(@NotNull ExecuteContext context) {
 		if (!context.ifContext())
-			return ExecuteResult.failure(new ErrorValue("else can only appear preceded by an if or else if statement"));
+			return ExecuteResult.failure(new ErrorValue(this, "else can only appear preceded by an if or else if statement"));
 
 		// Do not evaluate anything if the previous if statement was valid
 		if (context.ifState()) return ExecuteResult.success();

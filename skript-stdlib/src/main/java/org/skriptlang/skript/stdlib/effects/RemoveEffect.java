@@ -17,7 +17,7 @@ import static org.skriptlang.skript.api.nodes.NodeTypeBuilders.effect;
 public record RemoveEffect(ExpressionNode valueSelector, ExpressionNode receiverSelector) implements EffectNode {
 	public static final EffectNodeType<RemoveEffect> TYPE = effect(RemoveEffect.class)
 		.syntaxes("remove <expr> from <expr>")
-		.create((children, matchedPattern) -> new RemoveEffect((ExpressionNode) children.getFirst(), (ExpressionNode) children.getLast()))
+		.create(context -> new RemoveEffect(context.expression(0), context.expression(1)))
 		.build();
 
 	@Override
@@ -25,7 +25,7 @@ public record RemoveEffect(ExpressionNode valueSelector, ExpressionNode receiver
 
 		return TypeOperationUtils.applyRemove(receiverSelector.resolve(context), valueSelector.resolve(context).toValue())
 			? ExecuteResult.success()
-			: ExecuteResult.failure(new ErrorValue("Failed to remove value from receiver - does it support removing?"));
+			: ExecuteResult.failure(new ErrorValue(this, "Failed to remove value from receiver - does it support removing?"));
 
 	}
 }
